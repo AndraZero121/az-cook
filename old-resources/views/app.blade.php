@@ -13,8 +13,7 @@
                     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
                     if (prefersDark) {
-                        // REMOVE THE COMMENT TO ENABLE DARKMODE (NO DARK MODE IN HERE)
-                        // document.documentElement.classList.add('dark');
+                        document.documentElement.classList.add('dark');
                     }
                 }
             })();
@@ -33,15 +32,15 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link href="https://fonts.googleapis.com/css?family=Google+Sans:100,300,400,500,700,900&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
         @routes
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased overflow-x-hidden">
+    <body class="font-sans antialiased">
         @inertia
     </body>
 </html>
