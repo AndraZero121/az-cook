@@ -16,7 +16,7 @@ interface CardRecipe {
     slug: String;
   };
   loading?: Boolean;
-  onBookmark?: (value: Boolean) => any;
+  onBookmark?: (value: Boolean) => void;
 }
 
 export default function CardRecipe({ data, onBookmark, loading = false }: CardRecipe) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Link } from "@inertiajs/react"
 import { Menu } from "lucide-react"
 
@@ -16,7 +16,7 @@ export default function Header({ account }: HeaderContext) {
   const toggleOpensidebar = () => {
     setOpenSidebar(!openSidebar)
   }
-  const scrollingPage = () => {
+  const scrollingPage = useCallback(() => {
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
       if(!itScrollContent) {
         setItScrollContent(true)
@@ -26,7 +26,7 @@ export default function Header({ account }: HeaderContext) {
         setItScrollContent(false)
       }
     }
-  }
+  }, [itScrollContent])
   useEffect(() => {
     window.addEventListener('scroll', scrollingPage);
     return () => {
