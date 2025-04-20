@@ -28,11 +28,11 @@ export default function Header({ account }: HeaderContext) {
     }
   }
   useEffect(() => {
-    window.addEventListener("scroll", scrollingPage)
+    window.addEventListener('scroll', scrollingPage);
     return () => {
-      window.removeEventListener("scroll", scrollingPage)
-    }
-  }, [itScrollContent])
+      window.removeEventListener('scroll', scrollingPage);
+    };
+  }, [itScrollContent, scrollingPage]);
 
   return <>
     <div className="w-full h-[76px]"></div>
@@ -54,6 +54,9 @@ export default function Header({ account }: HeaderContext) {
             </Link>
             <Link href="/recipe" className="p-4 px-6 max-xl:w-full">
               <span className="text-[1.12rem]">Resep</span>
+            </Link>
+            <Link href="/recipe/ingredients" className="p-4 px-6 max-xl:w-full">
+              <span className="text-[1.12rem]">Resep Dari Bahan</span>
             </Link>
             <Link href="/bookmark" className="p-4 px-6 max-xl:w-full">
               <span className="text-[1.12rem]">Bookmark</span>

@@ -3,20 +3,20 @@ import { router } from '@inertiajs/react'
 
 interface CardRecipe {
   data?: {
-    image: String,
-    star?: Number,
-    title: String,
-    description?: String,
-    date?: Date|Number,
-    bookmark?: Boolean,
+    image: String;
+    star?: Number;
+    title: String;
+    description?: String;
+    date?: Date | Number;
+    bookmark?: Boolean;
     creator: {
-      icon: String,
-      username: String
-    },
-    slug: String
-  },
-  loading?: Boolean,
-  onBookmark?: Function
+      icon: String;
+      username: String;
+    };
+    slug: String;
+  };
+  loading?: Boolean;
+  onBookmark?: (value: Boolean) => any;
 }
 
 export default function CardRecipe({ data, onBookmark, loading = false }: CardRecipe) {
@@ -47,7 +47,7 @@ export default function CardRecipe({ data, onBookmark, loading = false }: CardRe
           <span className="text-sm font-bold ml-2.5">{String(data?.star||"1")}</span>
         </div>
         <button className="cursor-pointer flex items-center" type="button" onClick={() => {
-          if(typeof onBookmark === "function") { onBookmark() }
+          if(typeof onBookmark === "function") { onBookmark(!data?.bookmark) }
         }} aria-label="Bookmark">
           <span className="text-sm font-bold mr-1.5" style={{ color: data?.bookmark?"#0066ff":"#000000" }}>Boomark</span>
           <Bookmark size={18} color={data?.bookmark? "#0066ff":"#000000"}/>

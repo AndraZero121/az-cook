@@ -21,10 +21,10 @@ createInertiaApp({
     root.render(
       <>
         <Header
-          account={{
-            icon: 'https://github.com/AndraZero121.png',
-            username: 'AndraZero121 (@Example)',
-          }}
+          // account={{
+          //   icon: 'https://github.com/AndraZero121.png',
+          //   username: 'AndraZero121 (@Example)',
+          // }}
         />
         <div className="min-h-[calc(100vh-60px)]">
           <App {...props} />

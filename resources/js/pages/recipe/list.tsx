@@ -1,6 +1,5 @@
 import CardRecipe from '@/components/CardRecipe';
-import { type SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Search, ChevronRight } from 'lucide-react';
 
 // DUMMNY DATA CONTENT
@@ -51,8 +50,8 @@ const sampleDataContent = [
 ];
 
 export default function RecipePage() {
-  const { auth } = usePage<SharedData>().props;
   return <>
+    <Head title="Ingin Mencari Resep Makanan?!"/>
     <div className="w-full max-w-7xl m-auto h-[240px] flex justify-center items-center flex-col px-6 border-b border-gray-100">
       <div className="mb-5">
         <h1 className="font-bold text-2xl text-center">Ingin Mencari Resep Makanan?!</h1>
@@ -71,7 +70,7 @@ export default function RecipePage() {
     </div>
     <div className="w-full pt-4">
       {sampleDataContent.map((a, i) => (
-        <div className="m-auto my-5 w-full max-w-7xl">
+        <div className="m-auto my-5 w-full max-w-7xl" key={i}>
           <div className="flex justify-between px-6">
             <h2 className="text-3xl font-bold">{a.label}</h2>
           </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Bookmark, NotebookPenIcon, SendIcon, StarIcon } from "lucide-react"
 import CardRecipe from "@/components/CardRecipe";
+import { Head } from "@inertiajs/react";
 
 const sampleDataContent = {
   image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
@@ -166,6 +167,7 @@ export default function RecipeReading() {
   }, [])
 
   return <>
+    <Head title="Spaghetti Carbonara"></Head>
     <div className="max-w-7xl m-auto px-6 mt-3">
       {dataView.loading? <div className="w-full flex items-center">
         <div className="w-[20%] h-[26px] rounded-xl bg-gray-200 animate-pulse mt-2 mr-2"></div>
@@ -270,9 +272,66 @@ export default function RecipeReading() {
             <SendIcon size={18}/>
           </button>
         </div>
+        <div className="w-full" data-id="komentar">
+          <div className="w-full px-3 flex p-4 border-b border-gray-200">
+            <div className="w-[40px] mt-1">
+              <div className="w-[35px] h-[35px] overflow-hidden rounded-full">
+                <img
+                  src="https://randomuser.me/api/portraits/women/44.jpg"
+                  alt="Testing!"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <div className="w-[calc(100%-40px)] pl-1.5">
+              <small className="text-[0.9rem] font-bold">@chef_amelia</small>
+              <p>Test... test 1</p>
+              <div className="w-full flex mt-1.5">
+                <button type="button" className="text-sm mr-3.5 text-gray-500 cursor-pointer">
+                  <span>Reply</span>
+                </button>
+                <button type="button" className="text-sm mr-3.5 text-gray-500 cursor-pointer">
+                  <span>Edit</span>
+                </button>
+                <button type="button" className="text-sm text-red-500 cursor-pointer">
+                  <span>Delete</span>
+                </button>
+              </div>
+              <div className="w-full border-t border-gray-200 mt-2.5">
+                <div className="w-full px-3 flex p-4 border-b border-gray-200">
+                  <div className="w-[40px] mt-1">
+                    <div className="w-[35px] h-[35px] overflow-hidden rounded-full">
+                      <img
+                        src="https://randomuser.me/api/portraits/women/44.jpg"
+                        alt="Testing!"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-[calc(100%-40px)] pl-1.5">
+                    <small className="text-[0.9rem] font-bold">@chef_amelia</small>
+                    <p>Test... test 1</p>
+                    <div className="w-full flex mt-1.5">
+                      <button type="button" className="text-sm mr-3.5 text-gray-500 cursor-pointer">
+                        <span>Reply</span>
+                      </button>
+                      <button type="button" className="text-sm mr-3.5 text-gray-500 cursor-pointer">
+                        <span>Edit</span>
+                      </button>
+                      <button type="button" className="text-sm text-red-500 cursor-pointer">
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <h2 className="block w-full font-bold text-xl mt-4 mb-2.5">Penilaian</h2>
         <div className="w-full">
           <div className="w-full flex mb-1.5">
+            {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
             {[...Array(5)].map((_,i) => (
               <button type="button" className="w-[30px] h-[30px] flex items-center justify-start cursor-pointer" aria-label="Star Rateing" key={i} onClick={() => {
                 setRateingView(Number(i)+1)

@@ -155,10 +155,7 @@ export default function Welcome() {
             <div className="mt-5 flex w-full flex-wrap px-4">
               {[...a.list].slice(0, 6).map((b, c) => (
                 <div key={c} className="mb-3.5 flex w-full px-2 md:w-[calc(100%/2)] lg:w-[calc(100%/3)]">
-                  <CardRecipe
-                    data={b}
-                    // loading={true}
-                  />
+                  <CardRecipe data={b} />
                 </div>
               ))}
             </div>
