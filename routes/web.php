@@ -55,24 +55,24 @@ Route::get('/dash/comment', function () {
 })->name('manage-comment');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-  // Route::get('/bookmark', function () {
-  //   return Inertia::render('dash/bookmark');
-  // })->name('bookmark');
-  // Route::get('/dash', function () {
-  //   return Inertia::render('dash/home');
-  // })->name('dashboard');
-  // Route::get('/dash/like', function () {
-  //   return Inertia::render('dash/like');
-  // })->name('list-like');
-  // Route::get('/dash/add', function () {
-  //   return Inertia::render('dash/add');
-  // })->name('add-recipe');
-  // Route::get('/dash/{slug}/edit', function () {
-  //   return Inertia::render('dash/edit');
-  // })->name('edit-recipe');
-  // Route::get('/dash/comment', function () {
-  //   return Inertia::render('dash/comment');
-  // })->name('manage-comment');
+  Route::get('/bookmark', function () {
+    return Inertia::render('dash/bookmark');
+  })->name('bookmark');
+  Route::get('/dash', function () {
+    return Inertia::render('dash/home');
+  })->name('dashboard');
+  Route::get('/dash/like', function () {
+    return Inertia::render('dash/like');
+  })->name('list-like');
+  Route::get('/dash/add', function () {
+    return Inertia::render('dash/add');
+  })->name('add-recipe');
+  Route::get('/dash/{slug}/edit', function () {
+    return Inertia::render('dash/edit');
+  })->name('edit-recipe');
+  Route::get('/dash/comment', function () {
+    return Inertia::render('dash/comment');
+  })->name('manage-comment');
 });
 
 // -- DON'T USE IN PRODUCTION
