@@ -142,7 +142,7 @@ export default function Welcome() {
       </div>
       <div className="w-full">
         {sampleDataContent.map((a, i) => (
-          <div className="m-auto my-5 w-full max-w-7xl">
+          <div className="m-auto my-5 w-full max-w-7xl" key={i}>
             <div className="flex justify-between px-6">
               <h2 className="text-3xl font-bold">{a.label}</h2>
               {a.viewmore && (

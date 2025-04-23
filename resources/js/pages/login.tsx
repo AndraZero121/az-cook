@@ -4,14 +4,14 @@ export default function LoginPage() {
   return <>
     <Head title="Masuk"/>
     <div className="w-full max-w-6xl m-auto h-[calc(100vh-80px)] max-h-[900px] flex justify-center items-center">
-      <form className="w-full max-w-lg px-6" method="post">
+      <form className="w-full max-w-lg px-6" method="post" action="/login">
         <h1 className="text-3xl font-bold mb-4">Masuk</h1>
         <p>Silahkan masuk untuk mengakses beberapa menu</p>
         <label className="w-full mt-3 block">
           <p className="font-bold mb-1.5">Nama Pengguna</p>
           <input
             className="w-full block border border-gray-200 rounded-md p-1.5 px-4 outline-blue-400"
-            type="username"
+            type="text"
             name="username"
             placeholder="urdin_wasih"
             minLength={4}

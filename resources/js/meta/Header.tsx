@@ -4,8 +4,8 @@ import { Menu } from "lucide-react"
 
 interface HeaderContext {
   account?: {
-    icon: String|string,
-    username: String,
+    icon: string,
+    username: string,
   }|undefined
 }
 
@@ -22,7 +22,7 @@ export default function Header({ account }: HeaderContext) {
         setItScrollContent(true)
       }
     } else {
-      if(!!itScrollContent) {
+      if(itScrollContent) {
         setItScrollContent(false)
       }
     }
@@ -72,7 +72,7 @@ export default function Header({ account }: HeaderContext) {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="w-[calc(100%-48px] pl-3 overflow-hidden">
+                <div className="w-[calc(100%-48px)] pl-3 overflow-hidden">
                   <p title={String(account.username||"")} className="font-bold whitespace-nowrap overflow-hidden text-ellipsis">{String(account.username||"")}</p>
                 </div>
               </div>

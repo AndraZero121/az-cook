@@ -15,17 +15,17 @@ export default function Footer() {
       <div className="w-[calc(100%/2)] md:w-[200px] px-2">
         <h3 className="font-bold text-lg">Lainnya</h3>
         <ul className="mt-4">
-          <li><a href="/#hash" className="my-1.5 block">Beranda</a></li>
-          <li><a href="/#hash" className="my-1.5 block">Dukungan</a></li>
-          <li><a href="/#hash" className="my-1.5 block">Share Recipe</a></li>
+          <li><a href="/" className="my-1.5 block">Beranda</a></li>
+          <li><a href="/#support" className="my-1.5 block">Dukungan</a></li>
+          <li><a href="/#share-recipe" className="my-1.5 block">Share Recipe</a></li>
         </ul>
       </div>
       <div className="w-[calc(100%/2)] md:w-[200px] px-2">
         <h3 className="font-bold text-lg">Legalitas</h3>
         <ul className="mt-4">
-          <li><a href="/#hash" className="my-1.5 block">Syarat Dan Ketentuan</a></li>
-          <li><a href="/#hash" className="my-1.5 block">Keamanan Privasi</a></li>
-          <li><a href="/#hash" className="my-1.5 block">Tentang Layanan</a></li>
+          <li><a href="/terms" className="my-1.5 block">Syarat Dan Ketentuan</a></li>
+          <li><a href="/privacy" className="my-1.5 block">Keamanan Privasi</a></li>
+          <li><a href="/about" className="my-1.5 block">Tentang Layanan</a></li>
         </ul>
       </div>
     </div>

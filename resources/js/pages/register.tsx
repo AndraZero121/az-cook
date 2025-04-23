@@ -1,10 +1,10 @@
 import { Head, Link } from "@inertiajs/react";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return <>
     <Head title="Daftar"/>
     <div className="w-full max-w-6xl m-auto h-[calc(100vh-80px)] max-h-[900px] flex justify-center items-center">
-      <form className="w-full max-w-lg px-6" method="post">
+      <form className="w-full max-w-lg px-6" method="post" action="/register">
         <h1 className="text-3xl font-bold mb-4">Daftar</h1>
         <p>Daftar untuk membuat akun dan menambah resep</p>
         <label className="w-full mt-3 block">
@@ -22,7 +22,7 @@ export default function LoginPage() {
           <p className="font-bold mb-1.5">Nama Pengguna</p>
           <input
             className="w-full block border border-gray-200 rounded-md p-1.5 px-4 outline-blue-400"
-            type="username"
+            type="text"
             name="username"
             placeholder="urdin_wasih"
             required
@@ -72,7 +72,7 @@ export default function LoginPage() {
           <span className="font-bold text-white">Daftar</span>
         </button>
         <div className="mt-6">
-          <p>Sudah punya akun? <Link href="/register" className="text-blue-500 hover:underline">Masuk disini</Link></p>
+          <p>Sudah punya akun? <Link href="/login" className="text-blue-500 hover:underline">Masuk disini</Link></p>
         </div>
       </form>
     </div>

@@ -6,7 +6,7 @@ import { Search, ChevronRight } from 'lucide-react';
 const sampleDataContent = [
   {
     label: 'Most Search',
-    viewmore: '/recipe',
+    viewmore: '/recipe', // Adjusted route to match the context
     list: [
       {
         image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
@@ -73,6 +73,10 @@ export default function RecipePage() {
         <div className="m-auto my-5 w-full max-w-7xl" key={i}>
           <div className="flex justify-between px-6">
             <h2 className="text-3xl font-bold">{a.label}</h2>
+            <Link href={a.viewmore} className="text-blue-500 flex items-center">
+              <span>View More</span>
+              <ChevronRight size={16} />
+            </Link>
           </div>
           <div className="mt-5 flex w-full flex-wrap px-4">
             {a.list.map((b, c) => (

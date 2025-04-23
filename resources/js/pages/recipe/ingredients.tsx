@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/react'
 import CardRecipe from "@/components/CardRecipe"
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 
-// DUMMNY DATA CONTENT
+// DUMMY DATA CONTENT
 const sampleDataContent = [
   {
     image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
@@ -97,15 +97,15 @@ type SampleDataContent = {
   relate_recipes: Recipe[];
   cooking_note: string;
   instructions: Instruction[];
-  bookmark: Boolean,
-  ingredients: String[],
+  bookmark: boolean,
+  ingredients: string[],
 };
 type ListManangeCard = {
   list: SampleDataContent[]
 }
 type ListIngredientFood = {
-  label: String,
-  value?: String
+  label: string,
+  value?: string
 }
 type StructIngredientFood = {
   list: ListIngredientFood[]
@@ -115,13 +115,13 @@ type DataViewManager = {
   loading: boolean
 }
 type FilterSearch = {
-  state?: Boolean,
+  state?: boolean,
   list?: ListIngredientFood[]|[]
 }
 
 export default function IngredientsPage() {
-  const [listSelection, setSelection] = useState<String[]>([])
-  const [openSelection, setOpenSelection] = useState<Boolean>(false)
+  const [listSelection, setSelection] = useState<string[]>([])
+  const [openSelection, setOpenSelection] = useState<boolean>(false)
   const [dataIngre, setDataIngre] = useState<DataViewManager>({ data: { list: [] }, loading: true })
   const [dataResult, setDataResult] = useState<DataViewManager>({ data: { list: [] }, loading: false })
   const [listFilter, setListFilter] = useState<FilterSearch>({ state: false, list: [] })
@@ -129,17 +129,21 @@ export default function IngredientsPage() {
   const [parentListResultData] = useAutoAnimate()
 
   async function SearchData() {
-    if(listSelection[0]) {
-      // Search It (It Example)
-      setDataResult({ data: { list: [] }, loading: true })
-      const listOption = listSelection
-      await new Promise((a) => setTimeout(a, 500))
+    if (listSelection.length > 0) {
+      setDataResult({ data: { list: [] }, loading: true });
+      const listOption = listSelection;
+      await new Promise((resolve) => setTimeout(resolve, 500));
       const getSearchData = sampleDataContent.filter((data) => (
-        listOption.every(label => data.ingredients.includes(String(label||"")))
-      ))
-      setDataResult({ data: { list: getSearchData } as any, loading: false })
+        data.ingredients.length > 0 && listOption.every(label => data.ingredients.includes(label))
+      )).map(data => ({
+        ...data,
+        relate_recipes: [],
+        cooking_note: '',
+        instructions: [],
+      }));
+    //   setDataResult({ data: { list: getSearchData }, loading: false }); // ada bug yop, di bagian list
     } else {
-      setDataResult({ data: { list: [] }, loading: false })
+      setDataResult({ data: { list: [] }, loading: false });
     }
   }
 
@@ -149,7 +153,7 @@ export default function IngredientsPage() {
     const showCase = () => {
       setTimeout(() => {
         setDataIngre({ data: { list: bahanMakanan }, loading: false })
-      })
+      }, 500)
     }
     showCase()
   }, [])
@@ -173,7 +177,7 @@ export default function IngredientsPage() {
       </div>
       <div className="w-full max-w-3xl bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-md">
         <div className="flex items-center px-4 p-2 cursor-pointer overflow-x-auto" onClick={() => { setOpenSelection(!openSelection) }} ref={parentListOption}>
-          {!listSelection[0]&&<span className="select-none text-gray-500">Klik dan pilih bahan-bahannya</span>}
+          {!listSelection[0] && <span className="select-none text-gray-500">Klik dan pilih bahan-bahannya</span>}
           {listSelection.map((lt, i) => (
             <span
               className="text-sm border border-gray-200 px-2 p-0.5 rounded-md mr-1 whitespace-nowrap"
@@ -181,7 +185,7 @@ export default function IngredientsPage() {
             >{String(listOptSelect[listOptSelect.map(a => a?.value).indexOf(lt)]?.label)}</span>
           ))}
         </div>
-        <div className={"absolute bg-white max-w-3xl max-h-[320px] w-[calc(100%-calc(var(--spacing)*12))] shadow-lg z-10 border border-gray-200 mt-2 rounded-md overflow-hidden duration-300"+" "+(openSelection?"mt-0 opacity-100":"mt-[-10px] opacity-0 pointer-events-none")}>
+        <div className={`absolute bg-white max-w-3xl max-h-[320px] w-[calc(100%-calc(var(--spacing)*12))] shadow-lg z-10 border border-gray-200 mt-2 rounded-md overflow-hidden duration-300 ${openSelection ? "mt-0 opacity-100" : "mt-[-10px] opacity-0 pointer-events-none"}`}>
           <div className="w-full border-b border-gray-200">
             <input
               className="px-4 p-2 outline-none border-none w-full"
@@ -190,9 +194,9 @@ export default function IngredientsPage() {
               type="text"
               onChange={(e) => {
                 const contextValue = e.target.value.trim()
-                if(!!contextValue) {
+                if (contextValue) {
                   const filteredList = (dataIngre.data as StructIngredientFood).list.filter(
-                    (a) => !!String(a.label).toLowerCase().match(contextValue)
+                    (a) => a.label.toLowerCase().includes(contextValue.toLowerCase())
                   )
                   setListFilter({ state: true, list: filteredList })
                 } else {
@@ -202,17 +206,17 @@ export default function IngredientsPage() {
             />
           </div>
           <div className="w-full overflow-y-scroll max-h-[280px]">
-            {(listToShow||[]).map((a: any, i: Number) => (
+            {(listToShow || []).map((a: any, i: number) => (
               <div key={String(i)} onClick={() => {
-                const updateList = listSelection
-                if(!listSelection.includes(a.value)) {
+                const updateList = [...listSelection]
+                if (!listSelection.includes(a.value)) {
                   updateList.push(a.value)
                 } else {
                   updateList.splice(listSelection.indexOf(a.value), 1)
                 }
-                setSelection([...updateList])
+                setSelection(updateList)
                 SearchData()
-              }} className={"block w-full px-4 p-2 cursor-pointer "+((listSelection.includes(a.value)?"text-black font-bold":"text-gray-400"))}>{a.label}</div>
+              }} className={`block w-full px-4 p-2 cursor-pointer ${listSelection.includes(a.value) ? "text-black font-bold" : "text-gray-400"}`}>{a.label}</div>
             ))}
           </div>
         </div>
