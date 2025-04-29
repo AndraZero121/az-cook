@@ -1,66 +1,79 @@
-import { Bookmark, Star } from "lucide-react"
-import { router } from '@inertiajs/react'
+import { Link } from "@inertiajs/react";
+import { Bookmark, Star } from "lucide-react";
+import { useState } from "react";
+import { timeAgo } from "@/lib/utils";
 
-interface CardRecipe {
-  data?: {
-    image: String;
-    star?: Number;
-    title: String;
-    description?: String;
-    date?: Date | Number;
-    bookmark?: Boolean;
+interface CardRecipeProps {
+  data: {
+    image: string;
+    star: number;
+    title: string;
+    description: string;
+    date: number;
     creator: {
-      icon: String;
-      username: String;
+      icon: string;
+      username: string;
     };
-    slug: String;
+    slug: string;
+    bookmark?: boolean;
   };
-  loading?: Boolean;
-  onBookmark?: (value: Boolean) => void;
 }
 
-export default function CardRecipe({ data, onBookmark, loading = false }: CardRecipe) {
-  const visitPage = () => {
-    if(!data?.slug) return;
-    router.visit(`/recipe/${data?.slug}`)
-  }
+export default function CardRecipe({ data }: CardRecipeProps) {
+  const [isBookmarked, setIsBookmarked] = useState(data.bookmark);
 
-  return <div className="w-full border border-gray-200 rounded-md">
-    <div className="w-full overflow-hidden rounded-md h-[200px] bg-gray-200 cursor-pointer" onClick={visitPage}>
-      {!loading&&<img
-        className="w-full h-full object-cover"
-        src={String(data?.image||"")}
-        alt={String(data?.title||"")}
-      />}
-    </div>
-    <div className="w-full p-2 px-4 pt-3.5">
-      {!!loading? <div className="w-full flex flex-wrap mb-2.5">
-        <div className="w-full h-[20px] rounded-md bg-gray-200 animate-pulse"></div>
-        <div className="w-[40%] h-[20px] rounded-md bg-gray-200 animate-pulse mt-2 mr-2"></div>
-        <div className="w-[50%] h-[20px] rounded-md bg-gray-200 animate-pulse mt-2"></div>
-      </div>:<h1 className="text-xl font-bold hover:underline cursor-pointer" onClick={visitPage}>{String(data?.title||"")}</h1>}
-      <div className="w-full flex items-center justify-between my-3 mb-4.5">
-        <div className="flex items-center">
-          {[...Array(5)].map((c,i) => (
-            <Star size={18} key={i} color={(Number(i) < Number(data?.star||0))?"#fcb103":"#000000"} className="mr-0.5"/>
-          ))}
-          <span className="text-sm font-bold ml-2.5">{String(data?.star||"1")}</span>
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.preventDefault();
+    fetch(`/api/recipes/${data.slug}/bookmark`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    }).then(() => {
+      setIsBookmarked(!isBookmarked);
+    });
+  };
+
+  return (
+    <Link 
+      href={`/recipe/${data.slug}`} 
+      className="w-full h-full bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md duration-200"
+    >
+      <div className="w-full aspect-video relative overflow-hidden">
+        <img src={data.image} alt={data.title} className="w-full h-full object-cover"/>
+        <div className="absolute top-2 right-2 flex items-center space-x-2">
+          <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center">
+            <Star size={16} className="text-yellow-400 fill-yellow-400"/>
+            <span className="ml-1 text-sm">{data.star}</span>
+          </div>
+          <button 
+            onClick={handleBookmark}
+            className="bg-white/90 backdrop-blur-sm p-1.5 rounded-md"
+          >
+            <Bookmark 
+              size={16} 
+              className={isBookmarked ? "fill-blue-500 stroke-blue-500" : ""}
+            />
+          </button>
         </div>
-        <button className="cursor-pointer flex items-center" type="button" onClick={() => {
-          if(typeof onBookmark === "function") { onBookmark(!data?.bookmark) }
-        }} aria-label="Bookmark">
-          <span className="text-sm font-bold mr-1.5" style={{ color: data?.bookmark?"#0066ff":"#000000" }}>Boomark</span>
-          <Bookmark size={18} color={data?.bookmark? "#0066ff":"#000000"}/>
-        </button>
       </div>
-      {!!loading? <div className="w-full flex flex-wrap mb-2.5">
-        <div className="w-full h-[13px] rounded-md bg-gray-200 animate-pulse"></div>
-        <div className="w-[40%] h-[13px] rounded-md bg-gray-200 animate-pulse mt-2 mr-2"></div>
-        <div className="w-[50%] h-[13px] rounded-md bg-gray-200 animate-pulse mt-2"></div>
-        <div className="w-[70%] h-[13px] rounded-md bg-gray-200 animate-pulse mt-2 mr-2"></div>
-        <div className="w-[20%] h-[13px] rounded-md bg-gray-200 animate-pulse mt-2"></div>
-        <div className="w-[70%] h-[13px] rounded-md bg-gray-200 animate-pulse mt-2"></div>
-      </div>:<p className="text-[1rem] my-3">{String(data?.description||"")}</p>}
-    </div>
-  </div>
+      <div className="p-4">
+        <h3 className="font-bold text-lg line-clamp-1">{data.title}</h3>
+        <p className="mt-1 text-sm text-gray-600 line-clamp-2">{data.description}</p>
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="w-6 h-6 rounded-full overflow-hidden">
+              <img 
+                src={data.creator.icon} 
+                alt={data.creator.username}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <span className="ml-2 text-sm">{data.creator.username}</span>
+          </div>
+          <span className="text-sm text-gray-500">{timeAgo(new Date(data.date))}</span>
+        </div>
+      </div>
+    </Link>
+  );
 }

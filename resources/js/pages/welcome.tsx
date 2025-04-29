@@ -1,9 +1,8 @@
 import CardRecipe from '@/components/CardRecipe';
-import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 
-function WaveDecoration({ ...props }) {
+function WaveDecoration(props: any) {
   return (
     <svg id="visual" viewBox="0 0 500 500" width="500" height="500" xmlns="http://www.w3.org/2000/svg" version="1.1" {...props}>
       <g transform="translate(228.17353594252566 214.47984431155425)">
@@ -16,98 +15,9 @@ function WaveDecoration({ ...props }) {
   );
 }
 
-// DUMMNY DATA CONTENT
-const sampleDataContent = [
-  {
-    label: 'Trending Recipe',
-    viewmore: '/recipe',
-    list: [
-      {
-        image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
-        star: 4,
-        title: 'Spaghetti Carbonara',
-        description: 'A creamy, cheesy, and comforting Italian pasta dish made with eggs, cheese, pancetta, and pepper.',
-        date: new Date().getTime() - 1000 * 60 * 4,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/women/44.jpg',
-          username: 'chef_amelia',
-        },
-        slug: 'spaghetti-carbonara',
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-        star: 5,
-        title: 'Sushi Platter',
-        description: 'A beautiful assortment of fresh sushi rolls, sashimi, and nigiri perfect for seafood lovers.',
-        date: new Date().getTime() - 1000 * 60 * 9,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/men/21.jpg',
-          username: 'sushimaster_ken',
-        },
-        slug: 'sushi-platter',
-      },
-      {
-        image: 'https://sixhungryfeet.com/wp-content/uploads/2021/01/Vegan-Buddha-Bowl-with-Tofu-2.jpg',
-        star: 4,
-        title: 'Vegan Buddha Bowl',
-        description: 'A healthy and colorful bowl filled with quinoa, roasted veggies, hummus, and fresh greens.',
-        date: new Date().getTime() - 1000 * 60 * 24,
-        bookmark: true,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/women/68.jpg',
-          username: 'green_goddess',
-        },
-        slug: 'vegan-buddha-bowl',
-      },
-      {
-        image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
-        star: 4,
-        title: 'Spaghetti Carbonara',
-        description: 'A creamy, cheesy, and comforting Italian pasta dish made with eggs, cheese, pancetta, and pepper.',
-        date: new Date().getTime() - 1000 * 60 * 4,
-        bookmark: true,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/women/44.jpg',
-          username: 'chef_amelia',
-        },
-        slug: 'spaghetti-carbonara',
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-        star: 5,
-        title: 'Sushi Platter',
-        description: 'A beautiful assortment of fresh sushi rolls, sashimi, and nigiri perfect for seafood lovers.',
-        date: new Date().getTime() - 1000 * 60 * 9,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/men/21.jpg',
-          username: 'sushimaster_ken',
-        },
-        slug: 'sushi-platter',
-      },
-    ],
-  },
-  {
-    label: 'New Recipe',
-    viewmore: '/recipe?shortList=new',
-    list: [
-      {
-        image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
-        star: 4,
-        title: 'Spaghetti Carbonara',
-        description: 'A creamy, cheesy, and comforting Italian pasta dish made with eggs, cheese, pancetta, and pepper.',
-        date: new Date().getTime() - 1000 * 60 * 4,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/women/44.jpg',
-          username: 'chef_amelia',
-        },
-        slug: 'spaghetti-carbonara',
-      },
-    ],
-  },
-];
-
 export default function Welcome() {
-  const { auth } = usePage<SharedData>().props;
+  const { featuredRecipes = [], latestRecipes = [], popularCategories = [] } = usePage().props as any;
+
   return (
     <>
       <div className="-z-10 m-auto flex w-full max-w-7xl items-start justify-end overflow-hidden">
@@ -121,15 +31,11 @@ export default function Welcome() {
             Flavorful <span className="text-blue-500">Packet</span>
           </h1>
           <p className="mt-4.5 line-clamp-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam ultrices augue sapien, quis pharetra enim tincidunt vitae. Nulla commodo
-            lectus sed ipsum finibus, vitae eleifend quam mollis. Suspendisse dictum velit est, sed malesuada eros tincidunt non. Pellentesque vel
-            mollis arcu. Integer eu dignissim eros, et auctor dui. Nullam ut nibh sed mauris sollicitudin maximus sed a nisi. Nullam semper blandit
-            egestas. Vestibulum aliquam nulla eu aliquam ullamcorper. Ut odio lorem, porta ac eros in, facilisis suscipit lacus. Nam fermentum sem
-            velit, eu tristique nibh pretium ac. Aliquam accumsan luctus sapien, sit amet gravida massa suscipit at.
+            Temukan resep masakan terbaik, trending, dan terbaru setiap hari. Eksplorasi kategori populer dan mulai masak hari ini!
           </p>
-          <button className="mt-4 cursor-pointer rounded-3xl bg-blue-500 p-2.5 px-6 text-white shadow-md duration-150 hover:bg-blue-600 active:scale-95">
-            <span className="font-bold">Lihat Resepnya</span>
-          </button>
+          <Link href="/recipe" className="mt-4 inline-block cursor-pointer rounded-3xl bg-blue-500 p-2.5 px-6 text-white shadow-md duration-150 hover:bg-blue-600 active:scale-95">
+            <span className="font-bold">Lihat Semua Resep</span>
+          </Link>
         </div>
         <div className="mt-[30px] mb-[10px] flex w-full justify-center md:h-[490px] md:w-[400px] lg:w-[550px]">
           <img
@@ -140,27 +46,85 @@ export default function Welcome() {
           />
         </div>
       </div>
+
+      {/* Kategori Populer */}
       <div className="w-full">
-        {sampleDataContent.map((a, i) => (
-          <div className="m-auto my-5 w-full max-w-7xl" key={i}>
-            <div className="flex justify-between px-6">
-              <h2 className="text-3xl font-bold">{a.label}</h2>
-              {a.viewmore && (
-                <Link href={a.viewmore} className="flex items-center">
-                  <span className="mr-2 font-bold">Lihat lainnya</span>
-                  <ChevronRight size={18} />
+        <div className="m-auto my-5 w-full max-w-7xl">
+          <div className="flex justify-between px-6 items-center">
+            <h2 className="text-2xl font-bold">Kategori Populer</h2>
+            <Link href="/recipe" className="flex items-center text-blue-700 hover:underline">
+              <span className="mr-2 font-bold">Lihat Semua</span>
+              <ChevronRight size={18} />
+            </Link>
+          </div>
+          <div className="mt-4 flex flex-wrap px-4">
+            {popularCategories.length > 0 ? (
+              popularCategories.map((cat: any) => (
+                <Link
+                  key={cat.id}
+                  href={`/recipe?category=${cat.slug}`}
+                  className="mb-3.5 mr-3 flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 shadow-sm hover:bg-blue-50"
+                >
+                  {cat.image_path && (
+                    <img src={cat.image_path} alt={cat.name} className="w-8 h-8 object-cover rounded-full mr-2" />
+                  )}
+                  <span className="font-semibold">{cat.name}</span>
+                  <span className="ml-2 text-xs text-gray-500">({cat.recipes_count ?? 0} resep)</span>
                 </Link>
-              )}
-            </div>
-            <div className="mt-5 flex w-full flex-wrap px-4">
-              {[...a.list].slice(0, 6).map((b, c) => (
+              ))
+            ) : (
+              <div className="w-full text-center text-gray-500">Belum ada kategori populer.</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Resep Pilihan (Featured) */}
+      <div className="w-full">
+        <div className="m-auto my-5 w-full max-w-7xl">
+          <div className="flex justify-between px-6">
+            <h2 className="text-2xl font-bold">Resep Pilihan</h2>
+            <Link href="/recipe" className="flex items-center">
+              <span className="mr-2 font-bold">Lihat lainnya</span>
+              <ChevronRight size={18} />
+            </Link>
+          </div>
+          <div className="mt-5 flex w-full flex-wrap px-4">
+            {featuredRecipes.length > 0 ? (
+              featuredRecipes.map((b: any, c: number) => (
                 <div key={c} className="mb-3.5 flex w-full px-2 md:w-[calc(100%/2)] lg:w-[calc(100%/3)]">
                   <CardRecipe data={b} />
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="w-full text-center text-gray-500">Belum ada resep pilihan.</div>
+            )}
           </div>
-        ))}
+        </div>
+      </div>
+
+      {/* Resep Terbaru */}
+      <div className="w-full">
+        <div className="m-auto my-5 w-full max-w-7xl">
+          <div className="flex justify-between px-6">
+            <h2 className="text-2xl font-bold">Resep Terbaru</h2>
+            <Link href="/recipe" className="flex items-center">
+              <span className="mr-2 font-bold">Lihat lainnya</span>
+              <ChevronRight size={18} />
+            </Link>
+          </div>
+          <div className="mt-5 flex w-full flex-wrap px-4">
+            {latestRecipes.length > 0 ? (
+              latestRecipes.map((b: any, c: number) => (
+                <div key={c} className="mb-3.5 flex w-full px-2 md:w-[calc(100%/2)] lg:w-[calc(100%/3)]">
+                  <CardRecipe data={b} />
+                </div>
+              ))
+            ) : (
+              <div className="w-full text-center text-gray-500">Belum ada resep terbaru.</div>
+            )}
+          </div>
+        </div>
       </div>
     </>
   );

@@ -14,9 +14,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 class RecipeController extends Controller
 {
     use AuthorizesRequests;
+
     /**
      * Display a listing of the recipes.
      */
@@ -87,9 +89,9 @@ class RecipeController extends Controller
     /**
      * Display the specified recipe.
      */
-    public function show($slug)
+    public function show($id)
     {
-        $recipe = Recipe::where('slug', $slug)
+        $recipe = Recipe::findOrFail($id)
             ->where('status', 'approved')
             ->with([
                 'user',
@@ -220,9 +222,9 @@ class RecipeController extends Controller
     /**
      * Show the form for editing the specified recipe.
      */
-    public function edit($slug)
+    public function edit($id)
     {
-        $recipe = Recipe::where('slug', $slug)
+        $recipe = Recipe::findOrFail($id)
             ->where('user_id', Auth::id())
             ->with(['categories', 'ingredients.ingredient', 'steps'])
             ->firstOrFail();
@@ -245,9 +247,9 @@ class RecipeController extends Controller
     /**
      * Update the specified recipe in storage.
      */
-    public function update(Request $request, $slug)
+    public function update(Request $request, $id)
     {
-        $recipe = Recipe::where('slug', $slug)
+        $recipe = Recipe::findOrFail($id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
@@ -337,9 +339,9 @@ class RecipeController extends Controller
     /**
      * Remove the specified recipe from storage.
      */
-    public function destroy($slug)
+    public function destroy($id)
     {
-        $recipe = Recipe::where('slug', $slug)
+        $recipe = Recipe::findOrFail($id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
@@ -390,5 +392,33 @@ class RecipeController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    public function getLikedRecipes(Request $request)
+    {
+        $recipes = Recipe::whereHas('likes', function($query) use ($request) {
+            $query->where('user_id', $request->user()->id);
+        })
+        ->with(['user:id,name,profile_photo_path'])
+        ->withCount('likes')
+        ->latest()
+        ->get();
+
+        return response()->json([
+            'recipes' => $recipes
+        ]);
+    }
+
+    public function getUserRecipes(Request $request)
+    {
+        $recipes = Recipe::where('user_id', $request->user()->id)
+            ->with(['user:id,name,profile_photo_path'])
+            ->withCount('likes')
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'recipes' => $recipes
+        ]);
     }
 }

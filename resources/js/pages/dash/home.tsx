@@ -1,195 +1,171 @@
-import CardComment from '@/components/CardComment';
-import CardRecipe from '@/components/CardRecipe';
-import { Head, Link } from '@inertiajs/react';
-import { Search, ChevronRight, ArrowRight, PlusIcon, PenIcon } from 'lucide-react';
+import { Head, Link } from "@inertiajs/react";
+import { PenIcon, ArrowRight, ChevronRight, PlusIcon, BookOpen, Heart, MessageSquare } from 'lucide-react';
+import CardRecipe from "@/components/CardRecipe";
+import CardComment from "@/components/CardComment";
+import { useEffect, useState } from "react";
 
-// DUMMNY DATA CONTENT
-const listCommentDummy = [
-  {
-    username: "Konota",
-    icon: "https://img.freepik.com/premium-photo/user-icon-person-symbol-human-avatar-3d-render_473931-217.jpg?semt=ais_hybrid&w=740",
-    comment: "Artikel ini sangat membantu, terima kasih!",
-    id: 1
-  },
-  {
-    username: "Rahmi",
-    icon: "https://img.freepik.com/premium-photo/user-icon-person-symbol-human-avatar-3d-render_473931-217.jpg?semt=ais_hybrid&w=740",
-    comment: "Saya suka penjelasannya, mudah dipahami.",
-    id: 2
-  },
-  {
-    username: "rina_takasih",
-    icon: "https://img.freepik.com/premium-photo/user-icon-person-symbol-human-avatar-3d-render_473931-217.jpg?semt=ais_hybrid&w=740",
-    comment: "Bisa tolong dijelaskan lebih detail bagian terakhir?",
-    id: 3
-  },
-  {
-    username: "ridho_pratama",
-    icon: "https://img.freepik.com/premium-photo/user-icon-person-symbol-human-avatar-3d-render_473931-217.jpg?semt=ais_hybrid&w=740",
-    comment: "Kerja bagus. Lanjutkan.",
-    id: 4
-  },
-  {
-    username: "niku",
-    icon: "https://img.freepik.com/premium-photo/user-icon-person-symbol-human-avatar-3d-render_473931-217.jpg?semt=ais_hybrid&w=740",
-    comment: "Terima kasih banyak, sangat informatif.",
-    id: 5
-  }
-]
-const sampleDataContent = [
-  {
-    label: "Resepmu",
-    rgtbtn: {
-      label: "Buat baru",
-      path: "/dash/add"
-    },
-    list: [
-      {
-        image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-        star: 5,
-        title: 'Sushi Platter',
-        description: 'A beautiful assortment of fresh sushi rolls, sashimi, and nigiri perfect for seafood lovers.',
-        date: new Date().getTime() - 1000 * 60 * 9,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/men/21.jpg',
-          username: 'sushimaster_ken',
-        },
-        slug: 'sushi-platter',
-      },
-    ]
-  },
-  {
-    label: "Menyukai Resep",
-    rgtbtn: {
-      label: "Lainnya",
-      path: "/dash/like",
-      normalicon: true,
-    },
-    list: [
-      {
-        image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-        star: 5,
-        title: 'Sushi Platter',
-        description: 'A beautiful assortment of fresh sushi rolls, sashimi, and nigiri perfect for seafood lovers.',
-        date: new Date().getTime() - 1000 * 60 * 9,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/men/21.jpg',
-          username: 'sushimaster_ken',
-        },
-        slug: 'sushi-platter',
-      },
-    ]
-  },
-  {
-    label: 'Last Visit',
-    list: [
-      {
-        image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
-        star: 4,
-        title: 'Spaghetti Carbonara',
-        description: 'A creamy, cheesy, and comforting Italian pasta dish made with eggs, cheese, pancetta, and pepper.',
-        date: new Date().getTime() - 1000 * 60 * 4,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/women/44.jpg',
-          username: 'chef_amelia',
-        },
-        slug: 'spaghetti-carbonara',
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-        star: 5,
-        title: 'Sushi Platter',
-        description: 'A beautiful assortment of fresh sushi rolls, sashimi, and nigiri perfect for seafood lovers.',
-        date: new Date().getTime() - 1000 * 60 * 9,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/men/21.jpg',
-          username: 'sushimaster_ken',
-        },
-        slug: 'sushi-platter',
-      },
-      {
-        image: 'https://sixhungryfeet.com/wp-content/uploads/2021/01/Vegan-Buddha-Bowl-with-Tofu-2.jpg',
-        star: 4,
-        title: 'Vegan Buddha Bowl',
-        description: 'A healthy and colorful bowl filled with quinoa, roasted veggies, hummus, and fresh greens.',
-        date: new Date().getTime() - 1000 * 60 * 24,
-        bookmark: true,
-        creator: {
-          icon: 'https://randomuser.me/api/portraits/women/68.jpg',
-          username: 'green_goddess',
-        },
-        slug: 'vegan-buddha-bowl',
-      },
-    ],
-  },
-];
+interface Stats {
+  pendingRecipes: number;
+  approvedRecipes: number;
+  rejectedRecipes: number;
+  totalLikes: number;
+  bookmarks: number;
+  likes: number;
+}
 
-export default function HomeDashboard() {
-  return <>
-    <Head title="Beranda Akun"/>
-    <div className="w-full max-w-7xl m-auto">
-      <div className='w-full px-6 border-b border-gray-200 pb-4'>
-        <div className='w-full flex items-center'>
-          <div className='w-[95px] h-[95px] flex items-center justify-center'>
-            <div className='w-[90px] h-[90px] rounded-full overflow-hidden'>
-              <img
-                src='https://img.freepik.com/premium-photo/user-icon-person-symbol-human-avatar-3d-render_473931-217.jpg?semt=ais_hybrid&w=740'
-                alt='Image Icon'
-              />
-            </div>
+interface Recipe {
+  id: number;
+  image_path: string;
+  title: string;
+  description: string;
+  created_at: string;
+  user: {
+    name: string;
+    profile_photo_path: string | null;
+  };
+  _count?: {
+    likes: number;
+  };
+  is_bookmarked?: boolean;
+}
+
+interface User {
+  name: string;
+  profile_photo_path: string | null;
+  bio: string;
+}
+
+export default function HomeDashboard({ auth, stats, myRecipes }: { auth: any, stats: Stats, myRecipes: Recipe[] }) {
+  const [activeTab, setActiveTab] = useState('recipes');
+
+  const statsItems = [
+    {
+      label: "Total Resep",
+      value: stats.approvedRecipes + stats.pendingRecipes,
+      icon: BookOpen,
+      color: "text-blue-600"
+    },
+    {
+      label: "Total Like",
+      value: stats.totalLikes,
+      icon: Heart,
+      color: "text-red-500"
+    },
+    {
+      label: "Komentar",
+      value: stats.bookmarks,
+      icon: MessageSquare,
+      color: "text-green-500"
+    }
+  ];
+
+  return (
+    <>
+      <Head title="Dashboard"/>
+      <div className="w-full max-w-7xl mx-auto px-4 py-8">
+        {/* Profile Header */}
+        <div className="flex items-start gap-6 mb-8">
+          <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200">
+            <img
+              src={auth.user.profile_photo_path || '/default-avatar.png'}
+              alt={auth.user.name}
+              className="w-full h-full object-cover"
+            />
           </div>
-          <div className='w-[calc(100%-95px)] pl-2'>
-            <h2 className='font-bold text-2xl flex items-center'>
-              Your Name! 
-              <button className='border border-gray-200 p-2 px-3 flex items-center rounded-md ml-3 cursor-pointer'>
-                <PenIcon size={15}/>
-                <span className='text-sm font-normal ml-2 max-md:hidden'>Edit Profile</span>
-              </button>
-            </h2>
-            <p className='mt-1.5'>I'm a food chef</p>
-          </div>
-        </div>
-      </div>
-      <div className="m-auto my-5 w-full max-w-7xl">
-        <div className="flex justify-between px-6">
-          <h2 className="text-xl md:text-3xl font-bold">Komentar belum dijawab</h2>
-        </div>
-        <div className="mt-5 flex w-full snap-x snap-mandatory overflow-x-auto px-4">
-          {listCommentDummy.map((data, i) => (
-            <div key={i} className="mb-3.5 flex w-full px-2 md:w-[calc(100%/2)] lg:w-[calc(100%/3)] snap-center shrink-0">
-              <CardComment data={data} hiddentool={true}/>
-            </div>
-          ))}
-        </div>
-        <div className='w-full px-6 flex justify-end mt-2'>
-          <Link className='flex items-center cursor-pointer border-gray-200 border px-3 p-1.5 rounded-md' href='/dash/comment'>
-            <span className='mr-2'>Buka Management Komentar</span>
-            <ArrowRight size={18}/>
-          </Link>
-        </div>
-      </div>
-    </div>
-    <div className="w-full pt-4">
-      {sampleDataContent.map((a, i) => (
-        <div className="m-auto my-5 w-full max-w-7xl" key={i}>
-          <div className="flex justify-between px-6">
-            <h2 className="text-xl md:text-3xl font-bold">{a.label}</h2>
-            {a.rgtbtn && (
-              <Link href={a.rgtbtn.path} className="flex items-center">
-                <span className="mr-2 font-bold">{a.rgtbtn.label}</span>
-                {a.rgtbtn.normalicon?<ChevronRight size={18}/>:<PlusIcon size={18}/>}
+          <div className="flex-1">
+            <div className="flex items-center gap-4 mb-2">
+              <h1 className="text-2xl font-bold">{auth.user.name}</h1>
+              <Link
+                href="/user/profile"
+                className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2"
+              >
+                <PenIcon size={16}/>
+                Edit Profil
               </Link>
-            )}
+            </div>
+            <p className="text-gray-600 mb-4">{auth.user.bio || 'Belum ada bio'}</p>
+            
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {statsItems.map((item, index) => (
+                <div key={index} className="p-4 bg-white rounded-lg border border-gray-200 flex items-center gap-4">
+                  <div className={`p-3 rounded-full ${item.color} bg-opacity-10`}>
+                    <item.icon className={item.color} size={24}/>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">{item.label}</p>
+                    <p className="text-xl font-semibold">{item.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="mt-5 flex w-full flex-wrap px-4">
-            {a.list.map((b, c) => (
-              <div key={c} className="mb-3.5 flex w-full px-2 md:w-[calc(100%/2)] lg:w-[calc(100%/3)]">
-                <CardRecipe data={b} />
-              </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="border-b border-gray-200 mb-6">
+          <div className="flex gap-6">
+            <button
+              onClick={() => setActiveTab('recipes')}
+              className={`pb-4 font-medium ${
+                activeTab === 'recipes'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Resep Saya
+            </button>
+            <button
+              onClick={() => setActiveTab('draft')}
+              className={`pb-4 font-medium ${
+                activeTab === 'draft'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Draft
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">
+              {activeTab === 'recipes' ? 'Resep Saya' : 'Draft Resep'}
+            </h2>
+            <Link
+              href="/dash/add"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center gap-2"
+            >
+              <PlusIcon size={16}/>
+              Buat Resep Baru
+            </Link>
+          </div>
+
+          {/* Recipe Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {myRecipes.map((recipe) => (
+              <CardRecipe
+                key={recipe.id}
+                data={{
+                  image: recipe.image_path,
+                  star: recipe._count?.likes || 0,
+                  title: recipe.title,
+                  description: recipe.description,
+                  date: new Date(recipe.created_at).getTime(),
+                  creator: {
+                    icon: recipe.user.profile_photo_path || '/default-avatar.png',
+                    username: recipe.user.name
+                  },
+                  slug: recipe.id.toString(),
+                  bookmark: recipe.is_bookmarked
+                }}
+              />
             ))}
           </div>
         </div>
-      ))}
-    </div>
-  </>
+      </div>
+    </>
+  );
 }

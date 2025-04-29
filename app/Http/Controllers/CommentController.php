@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Recipe;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the user's comments.
      */
@@ -71,5 +73,29 @@ class CommentController extends Controller
         $comment->delete();
 
         return back()->with('success', 'Komentar berhasil dihapus.');
+    }
+
+    public function getUnansweredComments(Request $request)
+    {
+        $comments = Comment::whereHas('recipe', function($query) use ($request) {
+            $query->where('user_id', $request->user()->id);
+        })
+        ->whereNull('parent_id')
+        ->whereDoesntHave('replies')
+        ->with(['user:id,name,profile_photo_path'])
+        ->latest()
+        ->get()
+        ->map(function($comment) {
+            return [
+                'id' => $comment->id,
+                'username' => $comment->user->name,
+                'icon' => $comment->user->profile_photo_path,
+                'comment' => $comment->content
+            ];
+        });
+
+        return response()->json([
+            'comments' => $comments
+        ]);
     }
 }

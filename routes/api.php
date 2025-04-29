@@ -3,6 +3,7 @@
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/recipes/{recipe}/comments', [CommentController::class, 'store']);
     Route::put('/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
+    Route::get('/user/liked-recipes', [App\Http\Controllers\RecipeController::class, 'getLikedRecipes']);
+
+    // User dashboard routes
+    Route::get('/user/recipes', [RecipeController::class, 'getUserRecipes']);
+    Route::get('/user/unanswered-comments', [CommentController::class, 'getUnansweredComments']);
+    Route::get('/user/profile', [UserController::class, 'getProfile']);
 });
 
 // Public recipes API (for search, filtering, etc)

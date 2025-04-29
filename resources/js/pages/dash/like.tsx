@@ -1,62 +1,78 @@
-import CardRecipe from '@/components/CardRecipe';
-import { Head, Link } from '@inertiajs/react';
-import { ChevronLeftIcon } from 'lucide-react';
+import { Head } from "@inertiajs/react";
+import DashLayout from "@/layouts/DashLayout";
+import CardRecipe from "@/components/CardRecipe";
+import { useState, useEffect } from "react";
 
-const likeRecipe = [
-  {
-    image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
-    star: 4,
-    title: 'Spaghetti Carbonara',
-    description: 'A creamy, cheesy, and comforting Italian pasta dish made with eggs, cheese, pancetta, and pepper.',
-    date: new Date().getTime() - 1000 * 60 * 4,
-    creator: {
-      icon: 'https://randomuser.me/api/portraits/women/44.jpg',
-      username: 'chef_amelia',
-    },
-    slug: 'spaghetti-carbonara',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-    star: 5,
-    title: 'Sushi Platter',
-    description: 'A beautiful assortment of fresh sushi rolls, sashimi, and nigiri perfect for seafood lovers.',
-    date: new Date().getTime() - 1000 * 60 * 9,
-    creator: {
-      icon: 'https://randomuser.me/api/portraits/men/21.jpg',
-      username: 'sushimaster_ken',
-    },
-    slug: 'sushi-platter',
-  },
-  {
-    image: 'https://sixhungryfeet.com/wp-content/uploads/2021/01/Vegan-Buddha-Bowl-with-Tofu-2.jpg',
-    star: 4,
-    title: 'Vegan Buddha Bowl',
-    description: 'A healthy and colorful bowl filled with quinoa, roasted veggies, hummus, and fresh greens.',
-    date: new Date().getTime() - 1000 * 60 * 24,
-    bookmark: true,
-    creator: {
-      icon: 'https://randomuser.me/api/portraits/women/68.jpg',
-      username: 'green_goddess',
-    },
-    slug: 'vegan-buddha-bowl',
-  },
-]
+interface Recipe {
+  id: number;
+  image_path: string;
+  title: string;
+  description: string;
+  created_at: string;
+  user: {
+    name: string;
+    profile_photo_path: string | null;
+  };
+  _count?: {
+    likes: number;
+  };
+  is_bookmarked?: boolean;
+}
 
-export default function LikeManagePage() {
-  return <>
-    <Head title='Manage Comment'/>
-    <div className='max-w-7xl m-auto'>
-      <Link className='flex items-center px-4.5' href='/dash'>
-        <ChevronLeftIcon size={18} className='mr-2'/>
-        <span>Kembali Ke Halaman Utama</span>
-      </Link>
-      <div className="mt-5 flex w-full flex-wrap px-4">
-        {likeRecipe.map((b, c) => (
-          <div key={c} className="mb-3.5 flex w-full px-2 md:w-[calc(100%/2)] lg:w-[calc(100%/3)]">
-            <CardRecipe data={b} />
+export default function LikedRecipes() {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/user/liked-recipes')
+      .then(res => res.json())
+      .then(data => {
+        setRecipes(data.recipes);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <DashLayout>
+      <Head title="Resep Yang Disukai"/>
+      
+      <div className="w-full max-w-7xl mx-auto py-8">
+        <div className="px-6">
+          <h1 className="text-3xl font-bold">Resep Yang Disukai</h1>
+
+          <div className="mt-8">
+            {loading ? (
+              <div className="text-center py-8">Loading recipes...</div>
+            ) : recipes.length > 0 ? (
+              <div className="flex flex-wrap -mx-2">
+                {recipes.map((recipe) => (
+                  <div key={recipe.id} className="w-full px-2 mb-4 md:w-1/2 lg:w-1/3">
+                    <CardRecipe 
+                      data={{
+                        image: recipe.image_path,
+                        star: recipe._count?.likes || 0,
+                        title: recipe.title,
+                        description: recipe.description,
+                        date: new Date(recipe.created_at).getTime(),
+                        creator: {
+                          icon: recipe.user.profile_photo_path || '/default-avatar.png',
+                          username: recipe.user.name
+                        },
+                        slug: recipe.id.toString(),
+                        bookmark: recipe.is_bookmarked
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                Anda belum menyukai resep apapun.
+              </div>
+            )}
           </div>
-        ))}
+        </div>
       </div>
-    </div>
-  </>
+    </DashLayout>
+  );
 }

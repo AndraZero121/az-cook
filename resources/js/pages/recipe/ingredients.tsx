@@ -1,240 +1,188 @@
-import { useEffect, useState } from "react"
-import { Bookmark, Search } from "lucide-react"
-import { Head, Link } from '@inertiajs/react'
-import CardRecipe from "@/components/CardRecipe"
-import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { Head } from "@inertiajs/react";
+import MainLayout from "@/layouts/MainLayout";
+import CardRecipe from "@/components/CardRecipe";
+import { useState } from "react";
+import { Search, Loader2, X } from "lucide-react";
 
-// DUMMY DATA CONTENT
-const sampleDataContent = [
-  {
-    image: 'https://www.masakapahariini.com/wp-content/uploads/2020/12/spaghetti-carbonara-500x300.jpg',
-    star: 4,
-    title: 'Spaghetti Carbonara',
-    description: 'A creamy, cheesy, and comforting Italian pasta dish made with eggs, cheese, pancetta, and pepper.',
-    date: new Date().getTime() - 1000 * 60 * 4,
-    creator: {
-      icon: 'https://randomuser.me/api/portraits/women/44.jpg',
-      username: 'chef_amelia',
-    },
-    slug: 'spaghetti-carbonara',
-    ingredients: ['spaghetti', 'egg', 'onion', 'oil-zaitun', 'salt']
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836',
-    star: 5,
-    title: 'Sushi Platter',
-    description: 'A beautiful assortment of fresh sushi rolls, sashimi, and nigiri perfect for seafood lovers.',
-    date: new Date().getTime() - 1000 * 60 * 9,
-    creator: {
-      icon: 'https://randomuser.me/api/portraits/men/21.jpg',
-      username: 'sushimaster_ken',
-    },
-    slug: 'sushi-platter',
-    ingredients: ['raw-fish', 'shrimp', 'sushi-rice', 'nori', 'cucumber', 'avocado']
-  },
-  {
-    image: 'https://sixhungryfeet.com/wp-content/uploads/2021/01/Vegan-Buddha-Bowl-with-Tofu-2.jpg',
-    star: 4,
-    title: 'Vegan Buddha Bowl',
-    description: 'A healthy and colorful bowl filled with quinoa, roasted veggies, hummus, and fresh greens.',
-    date: new Date().getTime() - 1000 * 60 * 24,
-    bookmark: true,
-    creator: {
-      icon: 'https://randomuser.me/api/portraits/women/68.jpg',
-      username: 'green_goddess',
-    },
-    slug: 'vegan-buddha-bowl',
-    ingredients: ['chickpeas', 'black-beans', 'cashew', 'sesame', 'carrot', 'avocado', 'cucumber']
-  },
-]
+interface Ingredient {
+  id: number;
+  name: string;
+}
 
-const bahanMakanan = [
-  { value: "spaghetti", label: "Spaghetti" },
-  { value: "egg", label: "Telur" },
-  { value: "onion", label: "Bawang" },
-  { value: "oil-zaitun", label: "Minyak zaitun" },
-  { value: "salt", label: "Garam" },
-  { value: "shrimp", label: "Udang" },
-  { value: "raw-fish", label: "Ikan Mentah" },
-  { value: "sushi-rice", label: "Nasi Sushi" },
-  { value: "nori", label: "Nori" },
-  { value: "cucumber", label: "Mentimun" },
-  { value: "avocado", label: "Alpukat" },
-  { value: "carrot", label: "Wortel" },
-  { value: "chickpeas", label: "Buncis" },
-  { value: "black-beans", label: "Kacang Hitam" },
-  { value: "cashew", label: "Kacang Mete" },
-  { value: "sesame", label: "Biji Wijen" },
-]
-
-type Creator = {
-  icon: string;
-  username: string;
-};
-type Recipe = {
-  image: string;
-  star: number;
+interface Recipe {
+  id: number;
+  image_path: string;
   title: string;
   description: string;
-  date: number;
-  creator: Creator;
-  slug: string;
-  bookmark?: boolean;
-};
-type Instruction = {
-  index: number;
-  image: string | null;
-  note: string;
-};
-type SampleDataContent = {
-  image: string;
-  star: number;
-  title: string;
-  description: string;
-  date: number;
-  creator: Creator;
-  slug: string;
-  relate_recipes: Recipe[];
-  cooking_note: string;
-  instructions: Instruction[];
-  bookmark: boolean,
-  ingredients: string[],
-};
-type ListManangeCard = {
-  list: SampleDataContent[]
-}
-type ListIngredientFood = {
-  label: string,
-  value?: string
-}
-type StructIngredientFood = {
-  list: ListIngredientFood[]
-}
-type DataViewManager = {
-  data?: StructIngredientFood | ListManangeCard | null,
-  loading: boolean
-}
-type FilterSearch = {
-  state?: boolean,
-  list?: ListIngredientFood[]|[]
+  created_at: string;
+  user: {
+    name: string;
+    profile_photo_path: string | null;
+  };
+  _count?: {
+    likes: number;
+  };
+  is_bookmarked?: boolean;
 }
 
-export default function IngredientsPage() {
-  const [listSelection, setSelection] = useState<string[]>([])
-  const [openSelection, setOpenSelection] = useState<boolean>(false)
-  const [dataIngre, setDataIngre] = useState<DataViewManager>({ data: { list: [] }, loading: true })
-  const [dataResult, setDataResult] = useState<DataViewManager>({ data: { list: [] }, loading: false })
-  const [listFilter, setListFilter] = useState<FilterSearch>({ state: false, list: [] })
-  const [parentListOption] = useAutoAnimate()
-  const [parentListResultData] = useAutoAnimate()
+interface Props {
+  ingredients: Ingredient[];
+}
 
-  async function SearchData() {
-    if (listSelection.length > 0) {
-      setDataResult({ data: { list: [] }, loading: true });
-      const listOption = listSelection;
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const getSearchData = sampleDataContent.filter((data) => (
-        data.ingredients.length > 0 && listOption.every(label => data.ingredients.includes(label))
-      )).map(data => ({
-        ...data,
-        relate_recipes: [],
-        cooking_note: '',
-        instructions: [],
-      }));
-    //   setDataResult({ data: { list: getSearchData }, loading: false }); // ada bug yop, di bagian list
-    } else {
-      setDataResult({ data: { list: [] }, loading: false });
+export default function RecipeByIngredients({ ingredients }: Props) {
+  const [searchInput, setSearchInput] = useState('');
+  const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
+  const [searchResults, setSearchResults] = useState<{
+    data: { list: Recipe[] };
+    loading: boolean;
+  }>({ data: { list: [] }, loading: false });
+
+  const filteredIngredients = ingredients.filter(ing => 
+    ing.name.toLowerCase().includes(searchInput.toLowerCase()) &&
+    !selectedIngredients.some(selected => selected.id === ing.id)
+  );
+
+  const handleSelectIngredient = (ingredient: Ingredient) => {
+    setSelectedIngredients([...selectedIngredients, ingredient]);
+    setSearchInput('');
+  };
+
+  const handleRemoveIngredient = (ingredientId: number) => {
+    setSelectedIngredients(selectedIngredients.filter(ing => ing.id !== ingredientId));
+  };
+
+  const searchRecipes = async () => {
+    if (selectedIngredients.length === 0) {
+      setSearchResults({ data: { list: [] }, loading: false });
+      return;
     }
-  }
 
-  useEffect(() => {
-    // Sample Data (Like Real, But Only Dummy)
-    setDataIngre({ data: { list: [] }, loading: true })
-    const showCase = () => {
-      setTimeout(() => {
-        setDataIngre({ data: { list: bahanMakanan }, loading: false })
-      }, 500)
+    setSearchResults(prev => ({ ...prev, loading: true }));
+
+    try {
+      const response = await fetch('/api/recipes/search-by-ingredients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ingredients: selectedIngredients.map(ing => ing.id)
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch recipes');
+
+      const data = await response.json();
+      setSearchResults({ data: { list: data.recipes }, loading: false });
+    } catch (error) {
+      console.error('Error searching recipes:', error);
+      setSearchResults({ data: { list: [] }, loading: false });
     }
-    showCase()
-  }, [])
+  };
 
-  const listToShow = listFilter.state ? listFilter.list : (dataIngre.data as StructIngredientFood).list || []
-  const listOptSelect = (dataIngre.data as StructIngredientFood).list || []
-  const rawData = dataResult.data;
-  const isStruct = (d: any): d is StructIngredientFood =>
-    d !== null && !Array.isArray(d) && "list" in d;
-  const itemsToRender = !dataResult.loading
-    ? isStruct(rawData)
-      ? rawData.list
-      : []
-    : Array(3).fill(undefined);
-
-  return <>
-    <Head title="Cari Resep Dari Bahan - Bahan?!"/>
-    <div className="w-full max-w-7xl m-auto h-[240px] flex justify-center items-center flex-col px-6 border-b border-gray-100">
-      <div className="mb-5">
-        <h1 className="font-bold text-2xl text-center">Cari Resep Dari Bahan - Bahan?!</h1>
-      </div>
-      <div className="w-full max-w-3xl bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-md">
-        <div className="flex items-center px-4 p-2 cursor-pointer overflow-x-auto" onClick={() => { setOpenSelection(!openSelection) }} ref={parentListOption}>
-          {!listSelection[0] && <span className="select-none text-gray-500">Klik dan pilih bahan-bahannya</span>}
-          {listSelection.map((lt, i) => (
-            <span
-              className="text-sm border border-gray-200 px-2 p-0.5 rounded-md mr-1 whitespace-nowrap"
-              key={i}
-            >{String(listOptSelect[listOptSelect.map(a => a?.value).indexOf(lt)]?.label)}</span>
-          ))}
+  return (
+    <MainLayout>
+      <Head title="Cari Resep Dari Bahan - Bahan?!"/>
+      
+      <div className="w-full max-w-7xl mx-auto h-[240px] flex justify-center items-center flex-col px-6 border-b border-gray-100">
+        <div className="mb-5">
+          <h1 className="font-bold text-2xl text-center">Cari Resep Dari Bahan - Bahan?!</h1>
         </div>
-        <div className={`absolute bg-white max-w-3xl max-h-[320px] w-[calc(100%-calc(var(--spacing)*12))] shadow-lg z-10 border border-gray-200 mt-2 rounded-md overflow-hidden duration-300 ${openSelection ? "mt-0 opacity-100" : "mt-[-10px] opacity-0 pointer-events-none"}`}>
-          <div className="w-full border-b border-gray-200">
+        
+        <div className="w-full max-w-3xl bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-md">
+          <div className="flex items-center px-4 py-2 overflow-x-auto">
+            {selectedIngredients.map((ingredient) => (
+              <div 
+                key={ingredient.id}
+                className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full mr-2 shrink-0"
+              >
+                <span>{ingredient.name}</span>
+                <button 
+                  onClick={() => handleRemoveIngredient(ingredient.id)}
+                  className="ml-2 hover:text-blue-900"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
             <input
-              className="px-4 p-2 outline-none border-none w-full"
-              placeholder="Cari bahan..."
-              name="s-items"
               type="text"
-              onChange={(e) => {
-                const contextValue = e.target.value.trim()
-                if (contextValue) {
-                  const filteredList = (dataIngre.data as StructIngredientFood).list.filter(
-                    (a) => a.label.toLowerCase().includes(contextValue.toLowerCase())
-                  )
-                  setListFilter({ state: true, list: filteredList })
-                } else {
-                  setListFilter({ state: false, list: [] })
-                }
-              }}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="flex-1 outline-none bg-transparent min-w-[200px] placeholder-gray-400"
+              placeholder={selectedIngredients.length === 0 ? "Ketik nama bahan..." : "Tambah bahan lain..."}
             />
           </div>
-          <div className="w-full overflow-y-scroll max-h-[280px]">
-            {(listToShow || []).map((a: any, i: number) => (
-              <div key={String(i)} onClick={() => {
-                const updateList = [...listSelection]
-                if (!listSelection.includes(a.value)) {
-                  updateList.push(a.value)
-                } else {
-                  updateList.splice(listSelection.indexOf(a.value), 1)
-                }
-                setSelection(updateList)
-                SearchData()
-              }} className={`block w-full px-4 p-2 cursor-pointer ${listSelection.includes(a.value) ? "text-black font-bold" : "text-gray-400"}`}>{a.label}</div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-    <div className="w-full pt-4">
-      <div className="m-auto my-5 w-full max-w-7xl">
-        <div className="flex justify-between px-6">
-          <h2 className="text-3xl font-bold">Hasil Pencarian</h2>
-        </div>
-        <div className="mt-5 flex w-full flex-wrap px-4" ref={parentListResultData}>
-          {itemsToRender.map((b, c) => (
-            <div key={c} className="mb-3.5 flex w-full px-2 md:w-[calc(100%/2)] lg:w-[calc(100%/3)]">
-              <CardRecipe data={b} loading={dataResult.loading}/>
+          {searchInput && filteredIngredients.length > 0 && (
+            <div className="border-t border-gray-200 max-h-[200px] overflow-y-auto">
+              {filteredIngredients.map((ingredient) => (
+                <button
+                  key={ingredient.id}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100"
+                  onClick={() => handleSelectIngredient(ingredient)}
+                >
+                  {ingredient.name}
+                </button>
+              ))}
             </div>
-          ))}
+          )}
+        </div>
+
+        <button
+          onClick={searchRecipes}
+          disabled={selectedIngredients.length === 0 || searchResults.loading}
+          className={"mt-4 px-6 py-2 rounded-md text-white transition-colors " + 
+            (selectedIngredients.length === 0 
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-500 hover:bg-blue-600")}
+        >
+          <span className="flex items-center">
+            {searchResults.loading ? (
+              <>
+                <Loader2 size={18} className="animate-spin mr-2"/>
+                Mencari...
+              </>
+            ) : (
+              <>
+                <Search size={18} className="mr-2"/>
+                Cari Resep
+              </>
+            )}
+          </span>
+        </button>
+      </div>
+
+      <div className="w-full max-w-7xl mx-auto py-8">
+        <div className="px-6">
+          {searchResults.data.list.length > 0 ? (
+            <div className="flex flex-wrap -mx-2">
+              {searchResults.data.list.map((recipe) => (
+                <div key={recipe.id} className="w-full px-2 mb-4 md:w-1/2 lg:w-1/3">
+                  <CardRecipe 
+                    data={{
+                      image: recipe.image_path,
+                      star: recipe._count?.likes || 0,
+                      title: recipe.title,
+                      description: recipe.description,
+                      date: new Date(recipe.created_at).getTime(),
+                      creator: {
+                        icon: recipe.user.profile_photo_path || '/default-avatar.png',
+                        username: recipe.user.name
+                      },
+                      slug: recipe.id.toString(),
+                      bookmark: recipe.is_bookmarked
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : selectedIngredients.length > 0 && !searchResults.loading ? (
+            <div className="text-center py-8 text-gray-500">
+              Tidak ditemukan resep dengan bahan-bahan tersebut.
+            </div>
+          ) : null}
         </div>
       </div>
-    </div>
-  </>
+    </MainLayout>
+  );
 }
