@@ -1,104 +1,110 @@
 import { Link } from "@inertiajs/react";
-import { Instagram, Twitter, Facebook } from "lucide-react";
+import { Facebook, Twitter, Instagram } from "lucide-react";
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="mt-auto border-t border-gray-100 bg-white">
-      <div className="mx-auto w-full max-w-7xl px-6 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-          <div>
-            <Link href="/">
-              <img src="/logo.svg" alt="Logo" className="h-8" />
-            </Link>
-            <p className="mt-4 text-sm text-gray-600">
-              Temukan resep masakan terbaik, trending, dan terbaru setiap hari. 
-              Eksplorasi kategori populer dan mulai masak hari ini!
+    <footer className="bg-gray-50">
+      <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Brand Section */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold">AZ Cook</h2>
+            <p className="text-sm text-gray-600 max-w-xs">
+              Platform resep masakan terbaik di Indonesia. Temukan inspirasi memasak dari ribuan resep.
             </p>
-            <div className="mt-6 flex items-center space-x-4">
-              <a 
-                href="https://instagram.com" 
-                target="_blank" 
+            <div className="flex space-x-4">
+              <a
+                href="https://twitter.com/azcook"
+                target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <Instagram size={20} />
-              </a>
-              <a 
-                href="https://twitter.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="Twitter"
               >
                 <Twitter size={20} />
               </a>
-              <a 
-                href="https://facebook.com" 
-                target="_blank" 
+              <a
+                href="https://facebook.com/azcook"
+                target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="Facebook"
               >
                 <Facebook size={20} />
+              </a>
+              <a
+                href="https://instagram.com/azcook"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram size={20} />
               </a>
             </div>
           </div>
 
+          {/* Navigation Links */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider">Jelajahi</h3>
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/recipe" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/recipe" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Resep
                 </Link>
               </li>
               <li>
-                <Link href="/recipe/ingredients" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/recipe/ingredients" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Cari dari Bahan
                 </Link>
               </li>
               <li>
-                <Link href="/categories" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/categories" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Kategori
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Account Links */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider">Bergabung</h3>
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/register" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/register" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Daftar
                 </Link>
               </li>
               <li>
-                <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Masuk
                 </Link>
               </li>
               <li>
-                <Link href="/dash/add" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/dash/add" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Buat Resep
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Support Links */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider">Lainnya</h3>
-            <ul className="mt-4 space-y-2">
+            <ul className="mt-4 space-y-3">
               <li>
-                <Link href="/about" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/about" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Tentang Kami
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/privacy" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Kebijakan Privasi
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-sm text-gray-600 hover:text-gray-900">
+                <Link href="/terms" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                   Syarat dan Ketentuan
                 </Link>
               </li>
@@ -108,7 +114,7 @@ export default function Footer() {
 
         <div className="mt-12 border-t border-gray-100 pt-8">
           <p className="text-center text-sm text-gray-500">
-            © {new Date().getFullYear()} AZ Cook. All rights reserved.
+            © {year} AZ Cook. All rights reserved.
           </p>
         </div>
       </div>

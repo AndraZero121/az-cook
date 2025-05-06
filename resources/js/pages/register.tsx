@@ -10,7 +10,7 @@ export default function RegisterPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    post('/register');
+    post(route('register.store'));
   }
 
   return <>
@@ -88,7 +88,7 @@ export default function RegisterPage() {
         </button>
 
         <div className="mt-6">
-          <p>Sudah punya akun? <Link href="/login" className="text-blue-500 hover:underline">Masuk disini</Link></p>
+          <p>Sudah punya akun? <Link href={route('login')} className="text-blue-500 hover:underline">Masuk disini</Link></p>
         </div>
       </form>
     </div>

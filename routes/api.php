@@ -7,37 +7,29 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-// Recipe related APIs
 Route::middleware('auth:sanctum')->group(function () {
-    // Like recipe
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    // Recipe related APIs
     Route::post('/recipes/{id}/like', [RecipeController::class, 'toggleLike']);
-
-    // Bookmark recipe
     Route::post('/recipes/{id}/bookmark', [BookmarkController::class, 'toggle']);
+    Route::delete('/recipes/{id}/bookmark', [BookmarkController::class, 'destroy']);
 
-    // Comment on recipe
+    // Comments
     Route::post('/recipes/{recipe}/comments', [CommentController::class, 'store']);
     Route::put('/comments/{comment}', [CommentController::class, 'update']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy']);
-    Route::get('/user/liked-recipes', [App\Http\Controllers\RecipeController::class, 'getLikedRecipes']);
 
-    // User dashboard routes
+    // Get user recipes
+    Route::get('/user/liked-recipes', [RecipeController::class, 'getLikedRecipes']);
     Route::get('/user/recipes', [RecipeController::class, 'getUserRecipes']);
-    Route::get('/user/unanswered-comments', [CommentController::class, 'getUnansweredComments']);
-    Route::get('/user/profile', [UserController::class, 'getProfile']);
 });
 
-// Public recipes API (for search, filtering, etc)
+// Public recipe APIs
+Route::post('/recipes/search-by-ingredients', [RecipeController::class, 'searchByIngredients']);
+
 Route::get('/recipes', function (Request $request) {
     $query = \App\Models\Recipe::query()
         ->with(['user:id,name', 'categories:id,name,slug'])
@@ -56,14 +48,13 @@ Route::get('/recipes', function (Request $request) {
     return $query->latest()->paginate(12);
 });
 
-// Get ingredients for search
+// Public APIs for search functionalities
 Route::get('/ingredients', function () {
     return \App\Models\Ingredient::where('is_active', true)
         ->orderBy('name')
         ->get(['id', 'name']);
 });
 
-// Get categories
 Route::get('/categories', function () {
     return \App\Models\Category::where('is_active', true)
         ->orderBy('name')

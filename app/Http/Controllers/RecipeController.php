@@ -11,9 +11,12 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Log;
 
 class RecipeController extends Controller
 {
@@ -91,35 +94,65 @@ class RecipeController extends Controller
      */
     public function show($id)
     {
-        $recipe = Recipe::findOrFail($id)
-            ->where('status', 'approved')
-            ->with([
-                'user',
-                'categories',
-                'ingredients.ingredient',
-                'steps' => function($query) {
-                    $query->orderBy('order');
-                }
-            ])
-            ->firstOrFail();
+        try {
+            $recipe = Recipe::where('id', $id)
+                ->where('status', 'approved')
+                ->with([
+                    'user:id,name,profile_photo_path',
+                    'categories:id,name,slug',
+                    'ingredients.ingredient',
+                    'steps' => function($query) {
+                        $query->orderBy('order');
+                    }
+                ])
+                ->withCount(['likes', 'comments'])
+                ->firstOrFail();
 
-        // Increment view count or handle later with analytics
+            if (Auth::check()) {
+                $recipe->is_liked = $recipe->likes()
+                    ->where('user_id', Auth::id())
+                    ->exists();
 
-        // Get related recipes from same categories
-        $relatedRecipes = Recipe::whereHas('categories', function($query) use ($recipe) {
-                $query->whereIn('categories.id', $recipe->categories->pluck('id'));
-            })
-            ->where('id', '!=', $recipe->id)
-            ->where('status', 'approved')
-            ->with(['user', 'categories'])
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
+                $recipe->is_bookmarked = $recipe->bookmarks()
+                    ->where('user_id', Auth::id())
+                    ->exists();
+            }
 
-        return Inertia::render('recipe/read', [
-            'recipe' => $recipe,
-            'relatedRecipes' => $relatedRecipes
-        ]);
+            // Get related recipes from same categories
+            $relatedRecipes = Recipe::whereHas('categories', function($query) use ($recipe) {
+                    $query->whereIn('categories.id', $recipe->categories->pluck('id'));
+                })
+                ->where('id', '!=', $recipe->id)
+                ->where('status', 'approved')
+                ->with(['user:id,name,profile_photo_path'])
+                ->withCount(['likes'])
+                ->inRandomOrder()
+                ->limit(4)
+                ->get()
+                ->map(function($recipe) {
+                    if (Auth::check()) {
+                        $recipe->is_bookmarked = $recipe->bookmarks()
+                            ->where('user_id', Auth::id())
+                            ->exists();
+                    }
+                    return $recipe;
+                });
+
+            return Inertia::render('recipe/read', [
+                'recipe' => $recipe,
+                'relatedRecipes' => $relatedRecipes
+            ]);
+
+        } catch (\Exception $e) {
+            // Log error for debugging
+            Log::error('Recipe show error: ' . $e->getMessage());
+
+            if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                abort(Response::HTTP_NOT_FOUND, 'Recipe not found');
+            }
+
+            abort(Response::HTTP_INTERNAL_SERVER_ERROR, 'Error loading recipe');
+        }
     }
 
     /**
@@ -149,74 +182,102 @@ class RecipeController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:255',
             'description' => 'required',
-            'cooking_time' => 'nullable|integer',
-            'servings' => 'nullable|integer',
+            'cooking_time' => 'required|integer|min:1',
+            'servings' => 'required|integer|min:1',
             'difficulty' => 'required|in:mudah,sedang,sulit',
             'image' => 'nullable|image|max:2048',
-            'category_ids' => 'required|array',
+            'category_ids' => 'required|array|min:1',
             'category_ids.*' => 'exists:categories,id',
+            // Validate ingredients array and its contents
             'ingredients' => 'required|array|min:1',
             'ingredients.*.ingredient_id' => 'required|exists:ingredients,id',
-            'ingredients.*.quantity' => 'required|numeric|min:0',
+            'ingredients.*.quantity' => 'required|numeric|min:0.1',
             'ingredients.*.unit' => 'required|string|max:50',
+            'ingredients.*.notes' => 'nullable|string',
+            // Validate steps array and its contents
             'steps' => 'required|array|min:1',
-            'steps.*.description' => 'required|string',
-            'steps.*.image' => 'nullable|image|max:2048',
+            'steps.*.description' => 'required|string|min:10',
+            'steps.*.image' => 'nullable|image|max:2048'
+        ], [
+            'ingredients.required' => 'Minimal satu bahan harus diisi',
+            'ingredients.min' => 'Minimal satu bahan harus diisi',
+            'ingredients.*.ingredient_id.required' => 'Pilih bahan yang tersedia',
+            'ingredients.*.quantity.required' => 'Jumlah bahan harus diisi',
+            'ingredients.*.quantity.min' => 'Jumlah bahan harus lebih dari 0',
+            'ingredients.*.unit.required' => 'Satuan bahan harus diisi',
+            'steps.required' => 'Minimal satu langkah harus diisi',
+            'steps.min' => 'Minimal satu langkah harus diisi',
+            'steps.*.description.required' => 'Deskripsi langkah harus diisi',
+            'steps.*.description.min' => 'Deskripsi langkah minimal 10 karakter'
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        // Upload recipe image if provided
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('recipes', 'public');
-        }
+        try {
+            DB::beginTransaction();
 
-        // Create recipe
-        $recipe = Recipe::create([
-            'user_id' => Auth::id(),
-            'title' => $request->title,
-            'slug' => Str::slug($request->title) . '-' . Str::random(6),
-            'description' => $request->description,
-            'image_path' => $imagePath,
-            'cooking_time' => $request->cooking_time,
-            'servings' => $request->servings,
-            'difficulty' => $request->difficulty,
-            'status' => Auth::user()->is_admin ? 'approved' : 'pending',
-        ]);
-
-        // Attach categories
-        $recipe->categories()->attach($request->category_ids);
-
-        // Add ingredients
-        foreach ($request->ingredients as $ingredient) {
-            RecipeIngredient::create([
-                'recipe_id' => $recipe->id,
-                'ingredient_id' => $ingredient['ingredient_id'],
-                'quantity' => $ingredient['quantity'],
-                'unit' => $ingredient['unit'],
-                'notes' => $ingredient['notes'] ?? null,
-            ]);
-        }
-
-        // Add steps
-        foreach ($request->steps as $index => $step) {
-            $stepImagePath = null;
-            if (isset($step['image']) && $step['image']) {
-                $stepImagePath = $step['image']->store('recipe-steps', 'public');
+            // Upload recipe image if provided
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('recipes', 'public');
             }
 
-            RecipeStep::create([
-                'recipe_id' => $recipe->id,
-                'order' => $index + 1,
-                'description' => $step['description'],
-                'image_path' => $stepImagePath,
+            // Create recipe
+            $recipe = Recipe::create([
+                'user_id' => Auth::id(),
+                'title' => $request->title,
+                'slug' => Str::slug($request->title) . '-' . Str::random(6),
+                'description' => $request->description,
+                'image_path' => $imagePath,
+                'cooking_time' => $request->cooking_time,
+                'servings' => $request->servings,
+                'difficulty' => $request->difficulty,
+                'status' => Auth::user()->is_admin ? 'approved' : 'pending',
             ]);
-        }
 
-        return redirect()->route('dashboard')->with('success', 'Resep berhasil ditambahkan dan menunggu persetujuan.');
+            // Attach categories
+            $recipe->categories()->attach($request->category_ids);
+
+            // Add ingredients
+            foreach ($request->ingredients as $ingredient) {
+                RecipeIngredient::create([
+                    'recipe_id' => $recipe->id,
+                    'ingredient_id' => $ingredient['ingredient_id'],
+                    'quantity' => $ingredient['quantity'],
+                    'unit' => $ingredient['unit'],
+                    'notes' => $ingredient['notes'] ?? null,
+                ]);
+            }
+
+            // Add steps
+            foreach ($request->steps as $index => $step) {
+                $stepImagePath = null;
+                if (isset($step['image']) && $step['image']) {
+                    $stepImagePath = $step['image']->store('recipe-steps', 'public');
+                }
+
+                RecipeStep::create([
+                    'recipe_id' => $recipe->id,
+                    'order' => $index + 1,
+                    'description' => $step['description'],
+                    'image_path' => $stepImagePath,
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('dashboard')->with('success', 'Resep berhasil ditambahkan dan menunggu persetujuan.');
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            // Delete uploaded files if any
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            return back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan resep. Silakan coba lagi.'])->withInput();
+        }
     }
 
     /**
@@ -382,16 +443,24 @@ class RecipeController extends Controller
     public function toggleLike($id)
     {
         $recipe = Recipe::findOrFail($id);
+        $message = '';
+        $isLiked = false;
 
         if (Auth::user()->likes()->where('recipe_id', $id)->exists()) {
             Auth::user()->likes()->detach($id);
             $message = 'Resep dihapus dari daftar suka.';
+            $isLiked = false;
         } else {
             Auth::user()->likes()->attach($id);
             $message = 'Resep ditambahkan ke daftar suka.';
+            $isLiked = true;
         }
 
-        return back()->with('success', $message);
+        return response()->json([
+            'message' => $message,
+            'isLiked' => $isLiked,
+            'likesCount' => $recipe->likes()->count()
+        ]);
     }
 
     public function getLikedRecipes(Request $request)
@@ -420,5 +489,35 @@ class RecipeController extends Controller
         return response()->json([
             'recipes' => $recipes
         ]);
+    }
+
+    /**
+     * Search recipes by ingredients
+     */
+    public function searchByIngredients(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ingredients' => 'required|array',
+            'ingredients.*' => 'exists:ingredients,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Invalid ingredients'], 400);
+        }
+
+        $recipes = Recipe::with(['user', 'categories', 'ingredients.ingredient'])
+            ->where('status', 'approved')
+            ->whereHas('ingredients', function($query) use ($request) {
+                $query->whereIn('ingredient_id', $request->ingredients);
+            }, '>=', count($request->ingredients))
+            ->withCount('likes')
+            ->latest()
+            ->get()
+            ->map(function($recipe) {
+                $recipe->is_bookmarked = $recipe->bookmarks()->where('user_id', Auth::id())->exists();
+                return $recipe;
+            });
+
+        return response()->json(['recipes' => $recipes]);
     }
 }

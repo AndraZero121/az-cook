@@ -41,3 +41,57 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Recipe {
+  id: number;
+  title: string;
+  description: string;
+  image_path: string;
+  cooking_time?: number;
+  servings?: number;
+  difficulty?: 'mudah' | 'sedang' | 'sulit';
+  created_at: string;
+  user: {
+    id?: number;
+    name: string;
+    profile_photo_path: string | null;
+  };
+  categories?: {
+    id: number;
+    name: string;
+    slug: string;
+  }[];
+  ingredients?: {
+    id: number;
+    quantity: number;
+    unit: string;
+    notes?: string;
+    ingredient: {
+      id: number;
+      name: string;
+    };
+  }[];
+  steps?: {
+    id: number;
+    order: number;
+    description: string;
+    image_path: string | null;
+  }[];
+  _count?: {
+    likes: number;
+    comments?: number;
+  };
+  is_liked?: boolean;
+  is_bookmarked?: boolean;
+  comments?: Comment[];
+}
+
+export interface Comment {
+  id: number;
+  content: string;
+  created_at: string;
+  user: {
+    name: string;
+    profile_photo_path: string | null;
+  };
+}

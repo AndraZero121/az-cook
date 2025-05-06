@@ -13,7 +13,7 @@ export default function LoginPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    post('/login');
+    post(route('login.store'));
   }
 
   return <>
@@ -70,7 +70,7 @@ export default function LoginPage() {
           </span>
         </button>
         <div className="mt-6">
-          <p>Belum punya akun? <Link href="/register" className="text-blue-500 hover:underline">Daftar disini</Link></p>
+          <p>Belum punya akun? <Link href={route('register')} className="text-blue-500 hover:underline">Daftar disini</Link></p>
         </div>
       </form>
     </div>

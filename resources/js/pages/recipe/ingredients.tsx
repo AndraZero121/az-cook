@@ -37,7 +37,7 @@ export default function RecipeByIngredients({ ingredients }: Props) {
     loading: boolean;
   }>({ data: { list: [] }, loading: false });
 
-  const filteredIngredients = ingredients.filter(ing => 
+  const filteredIngredients = ingredients.filter(ing =>
     ing.name.toLowerCase().includes(searchInput.toLowerCase()) &&
     !selectedIngredients.some(selected => selected.id === ing.id)
   );
@@ -83,21 +83,21 @@ export default function RecipeByIngredients({ ingredients }: Props) {
   return (
     <MainLayout>
       <Head title="Cari Resep Dari Bahan - Bahan?!"/>
-      
+
       <div className="w-full max-w-7xl mx-auto h-[240px] flex justify-center items-center flex-col px-6 border-b border-gray-100">
         <div className="mb-5">
           <h1 className="font-bold text-2xl text-center">Cari Resep Dari Bahan - Bahan?!</h1>
         </div>
-        
+
         <div className="w-full max-w-3xl bg-gray-50 rounded-md overflow-hidden border border-gray-200 shadow-md">
           <div className="flex items-center px-4 py-2 overflow-x-auto">
             {selectedIngredients.map((ingredient) => (
-              <div 
+              <div
                 key={ingredient.id}
                 className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full mr-2 shrink-0"
               >
                 <span>{ingredient.name}</span>
-                <button 
+                <button
                   onClick={() => handleRemoveIngredient(ingredient.id)}
                   className="ml-2 hover:text-blue-900"
                 >
@@ -131,8 +131,8 @@ export default function RecipeByIngredients({ ingredients }: Props) {
         <button
           onClick={searchRecipes}
           disabled={selectedIngredients.length === 0 || searchResults.loading}
-          className={"mt-4 px-6 py-2 rounded-md text-white transition-colors " + 
-            (selectedIngredients.length === 0 
+          className={"mt-4 px-6 py-2 rounded-md text-white transition-colors " +
+            (selectedIngredients.length === 0
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-500 hover:bg-blue-600")}
         >
@@ -158,15 +158,15 @@ export default function RecipeByIngredients({ ingredients }: Props) {
             <div className="flex flex-wrap -mx-2">
               {searchResults.data.list.map((recipe) => (
                 <div key={recipe.id} className="w-full px-2 mb-4 md:w-1/2 lg:w-1/3">
-                  <CardRecipe 
+                  <CardRecipe
                     data={{
-                      image: recipe.image_path,
+                      image: recipe.image_path || '/default-recipe.jpg', // Tambahkan fallback image
                       star: recipe._count?.likes || 0,
                       title: recipe.title,
                       description: recipe.description,
                       date: new Date(recipe.created_at).getTime(),
                       creator: {
-                        icon: recipe.user.profile_photo_path || '/default-avatar.png',
+                        icon: recipe.user.profile_photo_path || '/default-avatar.png', // Tambahkan fallback avatar
                         username: recipe.user.name
                       },
                       slug: recipe.id.toString(),

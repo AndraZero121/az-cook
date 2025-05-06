@@ -5,6 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import Header from './meta/Header';
 import Footer from './meta/Footer';
+import { Toaster } from 'react-hot-toast';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -18,19 +19,22 @@ createInertiaApp({
   resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
   setup({ el, App, props }) {
     const root = createRoot(el);
-    
+
     root.render(
-      <App {...props}>
-        {({ Component, props }: { Component: React.ComponentType<any>; props: any }) => (
-          <>
-            <Header />
-            <div className="min-h-[calc(100vh-60px)]">
-              <Component {...props} />
-            </div>
-            <Footer />
-          </>
-        )}
-      </App>
+      <>
+        <App {...props}>
+          {({ Component, props }: { Component: React.ComponentType<any>; props: any }) => (
+            <>
+              <Header />
+              <div className="min-h-[calc(100vh-60px)]">
+                <Component {...props} />
+              </div>
+              <Footer />
+            </>
+          )}
+        </App>
+        <Toaster />
+      </>
     );
   },
   progress: {

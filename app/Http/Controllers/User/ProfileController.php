@@ -25,42 +25,48 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = User::find(Auth::id());
-        
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'bio' => ['nullable', 'string', 'max:500'],
             'photo' => [
                 'nullable',
+                'file',
                 'image',
                 'mimes:jpeg,png,jpg,gif',
-                'max:10240', // 10MB in kilobytes
+                'max:5120', // 5MB in kilobytes
             ],
         ];
 
-        // Add password validation if password is being updated
         if ($request->filled('password')) {
             $rules['password'] = ['required', 'string', 'min:8', 'confirmed'];
+            $rules['password_confirmation'] = ['required'];
         }
 
         $validated = $request->validate($rules);
 
-        // Handle photo upload
         if ($request->hasFile('photo')) {
-            $file = $request->file('photo');
-            
-            // Additional validation for file size
-            if ($file->getSize() > 10 * 1024 * 1024) { // 10MB in bytes
-                return redirect()->back()->withErrors(['photo' => 'Ukuran foto tidak boleh lebih dari 10MB']);
-            }
+            try {
+                $file = $request->file('photo');
 
-            // Delete old photo if exists
-            if ($user->profile_photo_path) {
-                Storage::disk('public')->delete($user->profile_photo_path);
-            }
+                // Delete old photo if exists
+                if ($user->profile_photo_path) {
+                    Storage::disk('public')->delete($user->profile_photo_path);
+                }
 
-            $path = $file->store('profile-photos', 'public');
-            $user->profile_photo_path = $path;
+                // Generate unique filename
+                $filename = 'profile-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('profile-photos', $filename, 'public');
+
+                if (!$path) {
+                    throw new \Exception('Failed to upload image');
+                }
+
+                $user->profile_photo_path = $path;
+            } catch (\Exception $e) {
+                return redirect()->back()->withErrors(['photo' => 'Gagal mengunggah foto. Silakan coba lagi.']);
+            }
         }
 
         $user->name = $validated['name'];

@@ -6,6 +6,7 @@ use App\Models\Recipe;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class BookmarkController extends Controller
 {
@@ -16,6 +17,8 @@ class BookmarkController extends Controller
     {
         $bookmarks = Auth::user()->bookmarks()
             ->with(['user', 'categories'])
+            ->withCount('likes')
+            ->latest()
             ->paginate(12);
 
         return Inertia::render('dash/bookmark', [
@@ -28,16 +31,67 @@ class BookmarkController extends Controller
      */
     public function toggle($id)
     {
-        $recipe = Recipe::findOrFail($id);
+        try {
+            $recipe = Recipe::findOrFail($id);
+            $isBookmarked = Auth::user()->bookmarks()->where('recipe_id', $id)->exists();
 
-        if (Auth::user()->bookmarks()->where('recipe_id', $id)->exists()) {
-            Auth::user()->bookmarks()->detach($id);
-            $message = 'Resep dihapus dari bookmark.';
-        } else {
-            Auth::user()->bookmarks()->attach($id);
-            $message = 'Resep ditambahkan ke bookmark.';
+            if ($isBookmarked) {
+                Auth::user()->bookmarks()->detach($id);
+                $message = 'Resep dihapus dari bookmark.';
+                $status = false;
+            } else {
+                Auth::user()->bookmarks()->attach($id);
+                $message = 'Resep ditambahkan ke bookmark.';
+                $status = true;
+            }
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'status' => $status,
+                    'bookmarked' => $status
+                ]);
+            }
+
+            return back()->with('success', $message);
+        } catch (ModelNotFoundException $e) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'message' => 'Resep tidak ditemukan.',
+                    'status' => 'error'
+                ], 404);
+            }
+
+            return back()->with('error', 'Resep tidak ditemukan.');
         }
+    }
 
-        return back()->with('success', $message);
+    /**
+     * Remove a bookmark.
+     */
+    public function destroy($id)
+    {
+        try {
+            $recipe = Recipe::findOrFail($id);
+            Auth::user()->bookmarks()->detach($id);
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'message' => 'Resep dihapus dari bookmark.',
+                    'status' => false
+                ]);
+            }
+
+            return back()->with('success', 'Resep dihapus dari bookmark.');
+        } catch (ModelNotFoundException $e) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'message' => 'Bookmark tidak ditemukan.',
+                    'status' => 'error'
+                ], 404);
+            }
+
+            return back()->with('error', 'Bookmark tidak ditemukan.');
+        }
     }
 }

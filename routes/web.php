@@ -42,6 +42,13 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+// Public Recipe Routes - Order matters!
+Route::prefix('recipe')->name('recipe.')->group(function () {
+    Route::get('/ingredients', [RecipeController::class, 'byIngredients'])->name('ingredients');
+    Route::get('/{id}', [RecipeController::class, 'show'])->name('show')->where('id', '[0-9]+');
+    Route::get('/', [RecipeController::class, 'index'])->name('index');
+});
+
 // Guest Routes
 Route::middleware('guest')->group(function () {
     Route::get('login', function () {
@@ -51,37 +58,42 @@ Route::middleware('guest')->group(function () {
     Route::get('register', function () {
         return Inertia::render('register');
     })->name('register');
-});
 
-// Public Recipe Routes
-Route::get('/recipe', [RecipeController::class, 'index'])->name('recipe.index');
-Route::get('/recipe/{id}', [RecipeController::class, 'show'])->name('recipe.show');
-Route::get('/recipe/ingredients', [RecipeController::class, 'byIngredients'])->name('recipe.ingredients');
+    // Add POST routes for authentication
+    Route::post('login', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store'])
+        ->name('login.store');
+
+    Route::post('register', [\App\Http\Controllers\Auth\RegisteredUserController::class, 'store'])
+        ->name('register.store');
+});
 
 // Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard & Profile
     Route::get('/dash', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/dash/recipes', [DashboardController::class, 'recipes'])->name('dash.recipes');
+    Route::get('/dash/bookmarks', [BookmarkController::class, 'index'])->name('dash.bookmarks');
+    Route::get('/dash/likes', [RecipeController::class, 'liked'])->name('dash.likes');
+    Route::get('/dash/comments', [CommentController::class, 'index'])->name('dash.comments');
+
+    // User Profile
+    Route::get('/user/profile', [\App\Http\Controllers\User\ProfileController::class, 'edit'])->name('user.profile.edit');
+    Route::post('/user/profile', [\App\Http\Controllers\User\ProfileController::class, 'update'])->name('user.profile.update');
 
     // Recipe Management
-    Route::get('/dash/recipes', [DashboardController::class, 'recipes'])->name('user.recipes');
     Route::get('/dash/add', [RecipeController::class, 'create'])->name('recipe.create');
-    Route::post('/dash/recipes', [RecipeController::class, 'store'])->name('recipe.store');
-    Route::get('/dash/recipes/{id}/edit', [RecipeController::class, 'edit'])->name('recipe.edit');
-    Route::patch('/dash/recipes/{id}', [RecipeController::class, 'update'])->name('recipe.update');
-    Route::delete('/dash/recipes/{id}', [RecipeController::class, 'destroy'])->name('recipe.destroy');
+    Route::post('/recipe', [RecipeController::class, 'store'])->name('recipe.store');
+    Route::get('/dash/recipe/{id}/edit', [RecipeController::class, 'edit'])->name('recipe.edit');
+    Route::put('/recipe/{id}', [RecipeController::class, 'update'])->name('recipe.update');
+    Route::delete('/recipe/{id}', [RecipeController::class, 'destroy'])->name('recipe.destroy');
 
-    // Recipe Interactions
-    Route::post('/recipes/{id}/like', [RecipeController::class, 'toggleLike'])->name('recipe.like');
-    Route::get('/dash/like', [RecipeController::class, 'liked'])->name('recipe.liked');
+    // Profile Settings
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Bookmarks
+    // Bookmarks & Comments
     Route::get('/bookmark', [BookmarkController::class, 'index'])->name('bookmark.index');
-    Route::post('/recipes/{id}/bookmark', [BookmarkController::class, 'toggle'])->name('bookmark.toggle');
-
-    // Comments
     Route::get('/dash/comment', [CommentController::class, 'index'])->name('comment.index');
     Route::post('/recipes/{recipe}/comments', [CommentController::class, 'store'])->name('comment.store');
     Route::patch('/comments/{comment}', [CommentController::class, 'update'])->name('comment.update');
@@ -94,25 +106,20 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // User Management
     Route::get('/users', [AdminController::class, 'users'])->name('users.index');
-    Route::patch('/users/{user}/toggle', [AdminController::class, 'toggleUserStatus'])->name('users.toggle');
+    Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('users.edit');
+    Route::patch('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.destroy');
 
     // Recipe Management
+    Route::get('/recipes', [AdminController::class, 'recipes'])->name('recipes.index');
     Route::get('/recipes/pending', [AdminController::class, 'pendingRecipes'])->name('recipes.pending');
-    Route::get('/recipes/{id}/review', [AdminController::class, 'showRecipeForApproval'])->name('recipes.review');
+    Route::get('/recipes/{id}', [AdminController::class, 'showRecipeForApproval'])->name('recipes.show');
     Route::patch('/recipes/{id}/approve', [AdminController::class, 'approveRecipe'])->name('recipes.approve');
     Route::patch('/recipes/{id}/reject', [AdminController::class, 'rejectRecipe'])->name('recipes.reject');
 
-    // Category & Ingredient Management
-    Route::resource('categories', CategoryController::class);
-    Route::patch('/categories/{category}/toggle', [CategoryController::class, 'toggleStatus'])->name('categories.toggle');
+    // Ingredient Management
     Route::resource('ingredients', IngredientController::class);
-    Route::patch('/ingredients/{ingredient}/toggle', [IngredientController::class, 'toggleStatus'])->name('ingredients.toggle');
-});
 
-// User Profile Management
-Route::middleware('auth')->prefix('user')->group(function () {
-    Route::get('/profile', [App\Http\Controllers\User\ProfileController::class, 'edit'])->name('user.profile.edit');
-    Route::post('/profile', [App\Http\Controllers\User\ProfileController::class, 'update'])->name('user.profile.update');
+    // Category Management
+    Route::resource('categories', CategoryController::class);
 });
-
-require __DIR__.'/auth.php';

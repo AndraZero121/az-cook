@@ -18,6 +18,12 @@ interface Props {
   categories: Category[];
 }
 
+interface PostOptions {
+  forceFormData?: boolean;
+  onError?: (errors: Record<string, string>) => void;
+  preserveState?: boolean;
+}
+
 export default function AddRecipePage({ ingredients, categories }: Props) {
   const [selectedIngredients, setSelectedIngredients] = useState<Array<{
     ingredient_id: number;
@@ -32,7 +38,7 @@ export default function AddRecipePage({ ingredients, categories }: Props) {
     imagePreview?: string;
   }>>([]);
 
-  const { data, setData, post, processing, errors, progress } = useForm({
+  const { data, setData, post, processing, errors, setError } = useForm({
     title: '',
     description: '',
     cooking_time: '',
@@ -105,10 +111,67 @@ export default function AddRecipePage({ ingredients, categories }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setData('ingredients', selectedIngredients);
-    setData('steps', steps);
-    post('/recipe');
-  };
+
+    // Validate ingredients first
+    if (selectedIngredients.length === 0) {
+        setError('ingredients', 'Minimal satu bahan harus diisi');
+        return;
+    }
+
+    // Validate steps
+    if (steps.length === 0) {
+        setError('steps', 'Minimal satu langkah harus diisi');
+        return;
+    }
+
+    // Create FormData instance
+    const formData = new FormData();
+
+    // Add basic fields
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    if (data.cooking_time) formData.append('cooking_time', data.cooking_time);
+    if (data.servings) formData.append('servings', data.servings);
+    formData.append('difficulty', data.difficulty);
+
+    // Add main image if exists
+    if (data.image) {
+        formData.append('image', data.image);
+    }
+
+    // Add categories
+    data.category_ids.forEach((id, index) => {
+        formData.append(`category_ids[${index}]`, id.toString());
+    });
+
+    // Add ingredients - ensure we're using the latest state
+    selectedIngredients.forEach((ing, index) => {
+        formData.append(`ingredients[${index}][ingredient_id]`, ing.ingredient_id.toString());
+        formData.append(`ingredients[${index}][quantity]`, ing.quantity.toString());
+        formData.append(`ingredients[${index}][unit]`, ing.unit);
+        if (ing.notes) formData.append(`ingredients[${index}][notes]`, ing.notes);
+    });
+
+    // Add steps - ensure we're using the latest state
+    steps.forEach((step, index) => {
+        formData.append(`steps[${index}][description]`, step.description);
+        if (step.image) {
+            formData.append(`steps[${index}][image]`, step.image);
+        }
+    });
+
+    // Submit form
+    post('/recipe', {
+        method: 'post',
+        ...Object.fromEntries(formData),
+    }, {
+        forceFormData: true,
+        onError: (errors: Record<string, string>) => {
+            console.error('Validation errors:', errors);
+        },
+        preserveState: true
+    });
+};
 
   return <>
     <Head title="Tambah Resep Baru"/>
@@ -412,3 +475,4 @@ export default function AddRecipePage({ ingredients, categories }: Props) {
     </div>
   </>
 }
+

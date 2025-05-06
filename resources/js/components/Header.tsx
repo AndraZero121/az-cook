@@ -1,116 +1,109 @@
 import { Link, usePage } from "@inertiajs/react";
 import { Menu, X, Search, Bell, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Props {
   account?: {
     name: string;
+    email: string;
     profile_photo_path: string | null;
   };
 }
 
 export default function Header({ account }: Props) {
-  const [openSidebar, setOpenSidebar] = useState(false);
-  const [openSearch, setOpenSearch] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const toggleOpensidebar = () => {
-    setOpenSidebar(!openSidebar);
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.account-menu')) {
+        setShowAccountMenu(false);
+      }
+      if (!target.closest('.mobile-menu')) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   return (
-    <header className="fixed top-0 left-0 z-50 flex h-[60px] w-full items-center border-b border-gray-100 bg-white px-4">
-      <div className="flex h-full w-full items-center justify-between">
-        <div className="flex items-center">
-          <Link href="/" className="mr-8">
-            <img src="/logo.svg" alt="Logo" className="h-8" />
-          </Link>
+    <header className={`fixed top-0 left-0 right-0 h-[60px] bg-white z-50 transition-shadow duration-200 ${
+      scrolled ? 'shadow-md' : ''
+    }`}>
+      <div className="h-full w-full max-w-7xl m-auto px-6 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="text-xl font-bold">
+          AZ Cook
+        </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden items-center space-x-6 md:flex">
-            <Link 
-              href="/recipe" 
-              className="text-gray-600 hover:text-gray-900"
-            >
-              Resep
-            </Link>
-            <Link 
-              href="/recipe/ingredients" 
-              className="text-gray-600 hover:text-gray-900"
-            >
-              Cari dari Bahan
-            </Link>
-          </nav>
-        </div>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-6">
+          <Link href="/recipe" className="text-gray-600 hover:text-gray-900">Resep</Link>
+          <Link href="/recipe/ingredients" className="text-gray-600 hover:text-gray-900">Cari dari Bahan</Link>
+          <Link href="/categories" className="text-gray-600 hover:text-gray-900">Kategori</Link>
+          <Link href="/about" className="text-gray-600 hover:text-gray-900">Tentang</Link>
+        </nav>
 
+        {/* Right Side Menu */}
         <div className="flex items-center space-x-4">
           {/* Search */}
-          <div className="relative">
-            <button
-              onClick={() => setOpenSearch(!openSearch)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-gray-100"
-            >
-              <Search size={20} />
-            </button>
-            {openSearch && (
-              <div className="absolute right-0 top-full mt-1 w-80 rounded-lg border border-gray-100 bg-white p-4 shadow-lg">
-                <form action="/recipe" method="GET">
-                  <input
-                    type="text"
-                    name="search"
-                    placeholder="Cari resep..."
-                    className="w-full rounded-lg border border-gray-200 px-4 py-2 outline-none focus:border-blue-500"
-                    autoFocus
-                  />
-                </form>
-              </div>
-            )}
-          </div>
+          <Link
+            href="/recipe/search"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+          >
+            <Search size={20} className="text-gray-600"/>
+          </Link>
 
           {account ? (
             <>
               {/* Notifications */}
-              <button className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-gray-100">
-                <Bell size={20} />
+              <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                <Bell size={20} className="text-gray-600"/>
               </button>
 
-              {/* Profile Menu */}
-              <div className="relative">
+              {/* Account Menu */}
+              <div className="relative account-menu">
                 <button
-                  onClick={toggleOpensidebar}
-                  className="flex items-center space-x-2 rounded-lg border border-gray-200 p-1.5 hover:bg-gray-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAccountMenu(!showAccountMenu);
+                  }}
+                  className="flex items-center space-x-2 cursor-pointer focus:outline-none"
                 >
-                  <div className="h-6 w-6 overflow-hidden rounded-full">
+                  <div className="w-8 h-8 rounded-full overflow-hidden">
                     <img
                       src={account.profile_photo_path || '/default-avatar.png'}
                       alt={account.name}
-                      className="h-full w-full object-cover"
+                      className="w-full h-full object-cover"
                     />
                   </div>
-                  <ChevronDown size={16} />
+                  <ChevronDown size={16} className={`text-gray-600 transition-transform duration-200 ${
+                    showAccountMenu ? 'rotate-180' : ''
+                  }`}/>
                 </button>
-                {openSidebar && (
-                  <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border border-gray-100 bg-white py-1 shadow-lg">
-                    <div className="border-b border-gray-100 px-4 py-2">
-                      <p className="font-medium">{account.name}</p>
+
+                {showAccountMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl border border-gray-100 shadow-lg py-2">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="font-semibold">{account.name}</p>
+                      <p className="text-sm text-gray-500">{account.email}</p>
                     </div>
-                    <Link
-                      href="/dash"
-                      className="block px-4 py-2 hover:bg-gray-50"
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/user/profile"
-                      className="block px-4 py-2 hover:bg-gray-50"
-                    >
-                      Pengaturan
-                    </Link>
-                    <Link
-                      href="/logout"
-                      method="post"
-                      as="button"
-                      className="block w-full px-4 py-2 text-left text-red-600 hover:bg-red-50"
-                    >
+                    <Link href="/dash" className="block px-4 py-2 text-gray-600 hover:bg-gray-50">Dashboard</Link>
+                    <Link href="/dash/add" className="block px-4 py-2 text-gray-600 hover:bg-gray-50">Buat Resep</Link>
+                    <Link href="/user/profile" className="block px-4 py-2 text-gray-600 hover:bg-gray-50">Pengaturan</Link>
+                    <Link href="/logout" method="post" as="button" className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">
                       Keluar
                     </Link>
                   </div>
@@ -118,16 +111,16 @@ export default function Header({ account }: Props) {
               </div>
             </>
           ) : (
-            <div className="flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-4">
               <Link
                 href="/login"
-                className="rounded-lg px-4 py-2 text-gray-600 hover:bg-gray-100"
+                className="font-semibold text-gray-600 hover:text-gray-900"
               >
                 Masuk
               </Link>
               <Link
                 href="/register"
-                className="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                className="font-semibold text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg"
               >
                 Daftar
               </Link>
@@ -136,33 +129,46 @@ export default function Header({ account }: Props) {
 
           {/* Mobile Menu Button */}
           <button
-            className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-gray-100 md:hidden"
-            onClick={toggleOpensidebar}
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden w-8 h-8 flex items-center justify-center"
           >
-            {openSidebar ? <X size={20} /> : <Menu size={20} />}
+            {isOpen ? (
+              <X size={24} className="text-gray-600"/>
+            ) : (
+              <Menu size={24} className="text-gray-600"/>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
-      {openSidebar && (
-        <div className="fixed inset-0 top-[60px] z-50 bg-black/50 md:hidden">
-          <div className="h-full w-64 bg-white p-4">
-            <nav className="flex flex-col space-y-4">
-              <Link 
-                href="/recipe" 
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Resep
-              </Link>
-              <Link 
-                href="/recipe/ingredients" 
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Cari dari Bahan
-              </Link>
-            </nav>
-          </div>
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="fixed inset-0 top-[60px] bg-white z-40 mobile-menu md:hidden">
+          <nav className="p-6">
+            <div className="space-y-4">
+              <Link href="/recipe" className="block text-lg">Resep</Link>
+              <Link href="/recipe/ingredients" className="block text-lg">Cari dari Bahan</Link>
+              <Link href="/categories" className="block text-lg">Kategori</Link>
+              <Link href="/about" className="block text-lg">Tentang</Link>
+            </div>
+
+            {!account && (
+              <div className="mt-8 space-y-4">
+                <Link
+                  href="/login"
+                  className="block w-full text-center font-semibold text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg px-4 py-2"
+                >
+                  Masuk
+                </Link>
+                <Link
+                  href="/register"
+                  className="block w-full text-center font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg px-4 py-2"
+                >
+                  Daftar
+                </Link>
+              </div>
+            )}
+          </nav>
         </div>
       )}
     </header>
