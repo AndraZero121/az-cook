@@ -1,6 +1,6 @@
 import { usePage } from "@inertiajs/react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/meta/Header";
+import Footer from "@/meta/Footer";
 
 interface Props {
   children: React.ReactNode;

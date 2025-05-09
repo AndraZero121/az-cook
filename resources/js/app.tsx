@@ -3,8 +3,6 @@ import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
-import Header from './meta/Header';
-import Footer from './meta/Footer';
 import { Toaster } from 'react-hot-toast';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -24,13 +22,7 @@ createInertiaApp({
       <>
         <App {...props}>
           {({ Component, props }: { Component: React.ComponentType<any>; props: any }) => (
-            <>
-              <Header />
-              <div className="min-h-[calc(100vh-60px)]">
-                <Component {...props} />
-              </div>
-              <Footer />
-            </>
+            <Component {...props} />
           )}
         </App>
         <Toaster />

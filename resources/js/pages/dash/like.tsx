@@ -35,7 +35,7 @@ export default function LikedRecipes() {
   return (
     <DashLayout>
       <Head title="Resep Yang Disukai"/>
-      
+
       <div className="w-full max-w-7xl mx-auto py-8">
         <div className="px-6">
           <h1 className="text-3xl font-bold">Resep Yang Disukai</h1>
@@ -47,7 +47,7 @@ export default function LikedRecipes() {
               <div className="flex flex-wrap -mx-2">
                 {recipes.map((recipe) => (
                   <div key={recipe.id} className="w-full px-2 mb-4 md:w-1/2 lg:w-1/3">
-                    <CardRecipe 
+                    <CardRecipe
                       data={{
                         image: recipe.image_path,
                         star: recipe._count?.likes || 0,

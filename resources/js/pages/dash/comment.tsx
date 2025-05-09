@@ -42,7 +42,7 @@ export default function CommentManagement() {
   return (
     <DashLayout>
       <Head title="Manajemen Komentar"/>
-      
+
       <div className="w-full max-w-7xl mx-auto py-8">
         <div className="px-6">
           <div className="flex items-center justify-between">
@@ -62,14 +62,14 @@ export default function CommentManagement() {
               <div className="text-center py-8">Loading comments...</div>
             ) : comments.length > 0 ? (
               comments.map((comment) => (
-                <CardComment 
-                  key={comment.id} 
+                <CardComment
+                  key={comment.id}
                   data={comment}
                 />
               ))
             ) : (
               <div className="text-center py-8 text-gray-500">
-                {filter === 'all' 
+                {filter === 'all'
                   ? 'Belum ada komentar pada resep Anda.'
                   : 'Tidak ada komentar yang belum dijawab.'}
               </div>

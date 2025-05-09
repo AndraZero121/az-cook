@@ -3,6 +3,7 @@ import { PenIcon, ArrowRight, ChevronRight, PlusIcon, BookOpen, Heart, MessageSq
 import CardRecipe from "@/components/CardRecipe";
 import CardComment from "@/components/CardComment";
 import { useEffect, useState } from "react";
+import DashLayout from "@/layouts/DashLayout";
 
 interface Stats {
   pendingRecipes: number;
@@ -60,8 +61,7 @@ export default function HomeDashboard({ auth, stats, myRecipes }: { auth: any, s
   ];
 
   return (
-    <>
-      <Head title="Dashboard"/>
+    <DashLayout title="Dashboard">
       <div className="w-full max-w-7xl mx-auto px-4 py-8">
         {/* Profile Header */}
         <div className="flex items-start gap-6 mb-8">
@@ -76,7 +76,7 @@ export default function HomeDashboard({ auth, stats, myRecipes }: { auth: any, s
             <div className="flex items-center gap-4 mb-2">
               <h1 className="text-2xl font-bold">{auth.user.name}</h1>
               <Link
-                href="/user/profile"
+                href="/profile"
                 className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 flex items-center gap-2"
               >
                 <PenIcon size={16}/>
@@ -84,7 +84,7 @@ export default function HomeDashboard({ auth, stats, myRecipes }: { auth: any, s
               </Link>
             </div>
             <p className="text-gray-600 mb-4">{auth.user.bio || 'Belum ada bio'}</p>
-            
+
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {statsItems.map((item, index) => (
@@ -166,6 +166,6 @@ export default function HomeDashboard({ auth, stats, myRecipes }: { auth: any, s
           </div>
         </div>
       </div>
-    </>
+    </DashLayout>
   );
 }

@@ -43,7 +43,7 @@ export default function Header({ account }: HeaderContext) {
           <Link href="/" className="flex items-center">
             <img src="/logo.svg" alt="Az Cook Logo" className="h-[35px]"/>
           </Link>
-          
+
           <nav className="ml-8 hidden xl:flex items-center space-x-6">
             <Link href="/" className="text-[1.12rem]">Home</Link>
             <Link href="/recipe" className="text-[1.12rem]">Resep</Link>
@@ -53,7 +53,7 @@ export default function Header({ account }: HeaderContext) {
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className="xl:hidden w-[48px] h-[48px] flex items-center justify-center"
           onClick={toggleOpensidebar}
           aria-label="Menu"
@@ -62,11 +62,11 @@ export default function Header({ account }: HeaderContext) {
         </button>
 
         {/* Mobile Navigation */}
-        <div 
+        <div
           className={`fixed inset-0 bg-black/50 z-40 xl:hidden ${openSidebar ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
           onClick={toggleOpensidebar}
         />
-        <div 
+        <div
           className={`fixed top-0 right-0 w-[300px] h-full bg-white z-50 transform transition-transform xl:hidden ${openSidebar ? 'translate-x-0' : 'translate-x-full'}`}
         >
           <nav className="flex flex-col p-6">
@@ -78,7 +78,7 @@ export default function Header({ account }: HeaderContext) {
               <>
                 <Link href="/dash" className="py-3">Dashboard</Link>
                 <Link href="/dash/recipe" className="py-3">Resep Saya</Link>
-                <Link href="/user/profile" className="py-3">Pengaturan</Link>
+                <Link href="/profile" className="py-3">Pengaturan</Link>
                 <hr className="my-3" />
                 <Link href="/logout" method="post" as="button" className="py-3 text-left text-red-600">
                   Keluar
@@ -97,7 +97,7 @@ export default function Header({ account }: HeaderContext) {
         <div className="hidden xl:flex items-center space-x-4">
           {auth.user ? (
             <div className="relative">
-              <button 
+              <button
                 onClick={toggleDropdown}
                 className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100"
               >
@@ -124,7 +124,7 @@ export default function Header({ account }: HeaderContext) {
                   <Link href="/dash/recipe" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Resep Saya
                   </Link>
-                  <Link href="/user/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     Pengaturan
                   </Link>
                   <hr className="my-1 border-gray-200" />

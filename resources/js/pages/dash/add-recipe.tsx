@@ -1,6 +1,7 @@
 import { Head, useForm } from "@inertiajs/react";
 import { Plus, Trash2, ImagePlus } from "lucide-react";
 import { useState, useRef } from "react";
+import axios from "axios";
 
 interface Ingredient {
   id: number;
@@ -124,54 +125,68 @@ export default function AddRecipePage({ ingredients, categories }: Props) {
         return;
     }
 
-    // Create FormData instance
+    // Update form data with latest ingredients and steps
+    setData('ingredients', selectedIngredients);
+    setData('steps', steps);
+
+    // Create FormData instance untuk penanganan file
     const formData = new FormData();
 
     // Add basic fields
     formData.append('title', data.title);
     formData.append('description', data.description);
-    if (data.cooking_time) formData.append('cooking_time', data.cooking_time);
-    if (data.servings) formData.append('servings', data.servings);
+    formData.append('cooking_time', data.cooking_time);
+    formData.append('servings', data.servings);
     formData.append('difficulty', data.difficulty);
 
     // Add main image if exists
     if (data.image) {
-        formData.append('image', data.image);
+      formData.append('image', data.image);
     }
 
     // Add categories
     data.category_ids.forEach((id, index) => {
-        formData.append(`category_ids[${index}]`, id.toString());
+      formData.append(`category_ids[${index}]`, id.toString());
     });
 
-    // Add ingredients - ensure we're using the latest state
+    // Add ingredients
     selectedIngredients.forEach((ing, index) => {
-        formData.append(`ingredients[${index}][ingredient_id]`, ing.ingredient_id.toString());
-        formData.append(`ingredients[${index}][quantity]`, ing.quantity.toString());
-        formData.append(`ingredients[${index}][unit]`, ing.unit);
-        if (ing.notes) formData.append(`ingredients[${index}][notes]`, ing.notes);
+      formData.append(`ingredients[${index}][ingredient_id]`, ing.ingredient_id.toString());
+      formData.append(`ingredients[${index}][quantity]`, ing.quantity.toString());
+      formData.append(`ingredients[${index}][unit]`, ing.unit);
+      if (ing.notes) formData.append(`ingredients[${index}][notes]`, ing.notes);
     });
 
-    // Add steps - ensure we're using the latest state
+    // Add steps
     steps.forEach((step, index) => {
-        formData.append(`steps[${index}][description]`, step.description);
-        if (step.image) {
-            formData.append(`steps[${index}][image]`, step.image);
-        }
+      formData.append(`steps[${index}][description]`, step.description);
+      if (step.image) {
+        formData.append(`steps[${index}][image]`, step.image);
+      }
     });
 
-    // Submit form
-    post('/recipe', {
-        method: 'post',
-        ...Object.fromEntries(formData),
-    }, {
-        forceFormData: true,
-        onError: (errors: Record<string, string>) => {
-            console.error('Validation errors:', errors);
-        },
-        preserveState: true
+    // Submit the form dengan axiosPost
+    axios.post('/recipe', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+      }
+    }).then(response => {
+      alert('Resep berhasil ditambahkan dan menunggu persetujuan admin');
+      window.location.href = '/dash';
+    }).catch(error => {
+      if (error.response?.data?.errors) {
+        // Handle validation errors
+        Object.entries(error.response.data.errors).forEach(([key, value]) => {
+          setError(key as any, Array.isArray(value) ? value[0] : value as any);
+        });
+      } else {
+        // Handle general error
+        console.error('Terjadi kesalahan:', error);
+        alert('Terjadi kesalahan saat menambahkan resep. Silakan coba lagi.');
+      }
     });
-};
+  };
 
   return <>
     <Head title="Tambah Resep Baru"/>
@@ -475,4 +490,3 @@ export default function AddRecipePage({ ingredients, categories }: Props) {
     </div>
   </>
 }
-

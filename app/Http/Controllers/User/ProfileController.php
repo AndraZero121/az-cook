@@ -15,7 +15,7 @@ class ProfileController extends Controller
 {
     public function edit()
     {
-        return Inertia::render('user/profile', [
+        return Inertia::render('profile', [
             'auth' => [
                 'user' => Auth::user()
             ]
@@ -80,5 +80,24 @@ class ProfileController extends Controller
         $user->save();
 
         return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    public function destroy(Request $request)
+    {
+        $user = User::find(Auth::id());
+
+        // Delete profile photo if exists
+        if ($user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+        }
+
+        // Delete user account
+        $user->delete();
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 }

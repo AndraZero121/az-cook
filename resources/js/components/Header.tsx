@@ -102,7 +102,7 @@ export default function Header({ account }: Props) {
                     </div>
                     <Link href="/dash" className="block px-4 py-2 text-gray-600 hover:bg-gray-50">Dashboard</Link>
                     <Link href="/dash/add" className="block px-4 py-2 text-gray-600 hover:bg-gray-50">Buat Resep</Link>
-                    <Link href="/user/profile" className="block px-4 py-2 text-gray-600 hover:bg-gray-50">Pengaturan</Link>
+                    <Link href="/profile" className="block px-4 py-2 text-gray-600 hover:bg-gray-50">Pengaturan</Link>
                     <Link href="/logout" method="post" as="button" className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">
                       Keluar
                     </Link>

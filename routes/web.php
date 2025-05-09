@@ -88,9 +88,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/recipe/{id}', [RecipeController::class, 'destroy'])->name('recipe.destroy');
 
     // Profile Settings
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [\App\Http\Controllers\User\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [\App\Http\Controllers\User\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [\App\Http\Controllers\User\ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Bookmarks & Comments
     Route::get('/bookmark', [BookmarkController::class, 'index'])->name('bookmark.index');
